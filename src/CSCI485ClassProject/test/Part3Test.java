@@ -105,6 +105,11 @@
 //    indexes = new IndexesImpl();
 //  }
 //
+//    @After
+//    public void close() {
+//            tableManager.closeDatabase();
+//            records.closeDatabase();
+//            }
 //  @Test
 //  public void unitTest1() {
 //    tableManager.dropAllTables();

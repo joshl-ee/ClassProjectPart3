@@ -271,4 +271,10 @@ public class RecordsImpl implements Records{
   public StatusCode deleteDataRecord(String tableName, String[] attrNames, Object[] attrValues) {
     return null;
   }
+
+  @Override
+  public void closeDatabase() {
+    // Custom method to close database
+    FDBHelper.close(db);
+  }
 }

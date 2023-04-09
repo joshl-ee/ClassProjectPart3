@@ -135,4 +135,7 @@ public interface Records {
    * @return StatusCode
    */
   StatusCode deleteDataRecord(String tableName, String[] attrNames, Object[] attrValues);
+
+  public void closeDatabase();
+
 }

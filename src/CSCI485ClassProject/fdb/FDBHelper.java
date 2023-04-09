@@ -175,4 +175,12 @@ public class FDBHelper {
     tx.cancel();
     tx.close();
   }
+
+  public static void close(Database db) {
+    try {
+      db.close();
+    } catch (Exception e) {
+      System.out.println("ERROR: the database is not successfully closed: " + e);
+    }
+  }
 }
