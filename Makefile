@@ -26,7 +26,7 @@ part2Test: preparation $(classes)
 	$(JAVA) -cp "$(OUTDIR):$(CLASSPATH)" org.junit.runner.JUnitCore CSCI485ClassProject.test.Part2Test
 
 part3Test: preparation $(classes)
-    mkdir -p $(OUTDIR)
-    $(JAVA) -cp "$(OUTDIR):$(CLASSPATH)" org.junit.runner.JUnitCore CSCI485ClassProject.test.Part3Test
+	mkdir -p $(OUTDIR)
+	$(JAVA) -cp "$(OUTDIR):$(CLASSPATH)" org.junit.runner.JUnitCore CSCI485ClassProject.test.Part3Test
 
-.PHONY: part1Test part2Test clean preparation
+.PHONY: part1Test part2Test part3Test clean preparation
