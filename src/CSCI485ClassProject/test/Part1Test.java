@@ -37,7 +37,6 @@ public class Part1Test {
   @After
   public void close() {
     tableManager.closeDatabase();
-    records.closeDatabase();
   }
 
   /**
