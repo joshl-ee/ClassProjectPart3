@@ -46,9 +46,7 @@ public class IndexesImpl implements Indexes{
     // Create hash index
     // TODO: Check if works
     if (indexType == IndexType.NON_CLUSTERED_HASH_INDEX) {
-      System.out.println("Creating Non clustered hash index");
-      // Add "hash" to path to specify index type
-      indexPath.add("hash");
+      //System.out.println("Creating Non clustered hash index");
 
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
@@ -58,7 +56,7 @@ public class IndexesImpl implements Indexes{
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
-        System.out.println("here");
+        //System.out.println("here");
         currRecord = records.getNext(cursor);
 
         // Get hashValue of record on attrName
@@ -79,9 +77,10 @@ public class IndexesImpl implements Indexes{
         // Create the indexed record's value tuple. This is ().
         Tuple valueTuple = new Tuple();
 
-        // Upload to FDB
+        // Upload to FDB. Add "hash" to path to specify index type
+        indexPath.add("hash");
         DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
-        System.out.println("Made " + indexPath);
+        //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
       }
     }
@@ -102,6 +101,7 @@ public class IndexesImpl implements Indexes{
       // Create two directories and sort based on midpoint
     }
 
+    FDBHelper.commitTransaction(tx);
     return StatusCode.SUCCESS;
   }
 
