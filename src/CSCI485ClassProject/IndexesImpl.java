@@ -44,7 +44,6 @@ public class IndexesImpl implements Indexes{
     }
 
     // Create hash index
-    // TODO: Check if works
     if (indexType == IndexType.NON_CLUSTERED_HASH_INDEX) {
       //System.out.println("Creating Non clustered hash index");
 
@@ -86,19 +85,41 @@ public class IndexesImpl implements Indexes{
     }
     // TODO: Create B+ tree index
     else {
-      // Add "bplus" to path to specify index type
-      indexPath.add("bplus");
-
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
       Record currRecord = new Record();
+      boolean firstProcessed = false;
 
-      //
+      while (cursor.hasNext() || !firstProcessed) {
+        if (!firstProcessed) firstProcessed = true;
+        //System.out.println("here");
+        currRecord = records.getNext(cursor);
 
-      // Create key to specify midpoint
+        // Get attrValue of record on attrName
+        Object attrValue = currRecord.getValueForGivenAttrName(attrName);
 
-      // Create two directories and sort based on midpoint
+        // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
+        Tuple keyTuple = new Tuple();
+        keyTuple = keyTuple.addObject(attrValue); // Used to have .add(indexType). I don't think this is necessary anymore.
+
+        TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
+        List<String> pkNames = metadata.getPrimaryKeys();
+        Collections.sort(pkNames);
+
+        for (String pk : pkNames) {
+          keyTuple = keyTuple.addObject(currRecord.getValueForGivenAttrName(pk));
+        }
+
+        // Create the indexed record's value tuple. This is ().
+        Tuple valueTuple = new Tuple();
+
+        // Upload to FDB. Add "bplus" to path to specify index type
+        indexPath.add("bplus");
+        DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
+        //System.out.println("Made " + indexPath);
+        FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
+      }
     }
 
     FDBHelper.commitTransaction(tx);
