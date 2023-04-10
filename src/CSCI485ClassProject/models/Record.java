@@ -169,6 +169,13 @@ public class Record {
     return null;
   }
 
+  public int getHashCodeForGivenAttrName(String attrName) {
+    if (mapAttrNameToValue.containsKey(attrName)) {
+      return mapAttrNameToValue.get(attrName).hashCode();
+    }
+    return 0;
+  }
+
   public AttributeType getTypeForGivenAttrName(String attrName) {
     if (mapAttrNameToValue.containsKey(attrName)) {
       return mapAttrNameToValue.get(attrName).getType();

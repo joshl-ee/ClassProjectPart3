@@ -174,6 +174,7 @@ public class TableManagerImpl implements TableManager{
     FDBHelper.clear(db);
     return StatusCode.SUCCESS;
   }
+
   @Override
   public void closeDatabase() {
     FDBHelper.close(db);

@@ -1,208 +1,210 @@
-//package CSCI485ClassProject.test;
-//
-//import CSCI485ClassProject.Cursor;
-//import CSCI485ClassProject.Indexes;
-//import CSCI485ClassProject.IndexesImpl;
-//import CSCI485ClassProject.Records;
-//import CSCI485ClassProject.RecordsImpl;
-//import CSCI485ClassProject.StatusCode;
-//import CSCI485ClassProject.TableManager;
-//import CSCI485ClassProject.TableManagerImpl;
-//import CSCI485ClassProject.models.AttributeType;
-//import CSCI485ClassProject.models.ComparisonOperator;
-//import CSCI485ClassProject.models.IndexType;
-//import CSCI485ClassProject.models.Record;
-//import CSCI485ClassProject.models.TableMetadata;
-//import org.junit.Before;
-//import org.junit.Test;
-//
-//import java.util.HashMap;
-//import java.util.Random;
-//
-//import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertNotNull;
-//import static org.junit.Assert.assertNull;
-//
-//public class Part3Test {
-//
-//  public static String EmployeeTableName = "Employee";
-//  public static String SSN = "SSN";
-//  public static String Name = "Name";
-//  public static String Email = "Email";
-//  public static String Age = "Age";
-//  public static String Address = "Address";
-//  public static String Salary = "Salary";
-//
-//  public static String[] EmployeeTableAttributeNames = new String[]{SSN, Name, Email, Age, Address, Salary};
-//  public static String[] EmployeeTableNonPKAttributeNames = new String[]{Name, Email, Age, Address, Salary};
-//  public static AttributeType[] EmployeeTableAttributeTypes =
-//      new AttributeType[]{AttributeType.INT, AttributeType.VARCHAR, AttributeType.VARCHAR, AttributeType.INT, AttributeType.VARCHAR, AttributeType.INT};
-//
-//  public static String[] UpdatedEmployeeTableNonPKAttributeNames = new String[]{Name, Email, Age, Address, Salary};
-//  public static String[] EmployeeTablePKAttributes = new String[]{"SSN"};
-//
-//
-//  public static int initialNumberOfRecords = 100;
-//  public static int updatedNumberOfRecords = initialNumberOfRecords / 2;
-//  public static int randSeed = 30;
-//
-//  private TableManager tableManager;
-//  private Records records;
-//  private Indexes indexes;
-//
-//  private long getPerfRandNumber(Random generator) {
-//    long randomLong = generator.nextLong();
-//
-//    if (randomLong < 0) {
-//      randomLong = -randomLong;
-//    }
-//    return randomLong;
-//  }
-//
-//  private String getName(long i) {
-//    return "Name" + i;
-//  }
-//
-//  private String getEmail(long i) {
-//    return "ABCDEFGH" + i + "@usc.edu";
-//  }
-//
-//  private long getAge(long i) {
-//    return (i+25)%90;
-//  }
-//
-//  private String getAddress(long i) {
-//    return "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + i;
-//  }
-//
-//  private long getSalary(long i) {
-//    return i;
-//  }
-//
-//  private Record getExpectedEmployeeRecord(long ssn) {
-//    Record rec = new Record();
-//    String name = getName(ssn);
-//    String email = getEmail(ssn);
-//    long age = getAge(ssn);
-//    String address = getAddress(ssn);
-//    long salary = getSalary(ssn);
-//
-//    rec.setAttrNameAndValue(SSN, ssn);
-//    rec.setAttrNameAndValue(Name, name);
-//    rec.setAttrNameAndValue(Email, email);
-//    rec.setAttrNameAndValue(Age, age);
-//    rec.setAttrNameAndValue(Address, address);
-//    rec.setAttrNameAndValue(Salary, salary);
-//
-//    return rec;
-//  }
-//
-//
-//  @Before
-//  public void init(){
-//    tableManager = new TableManagerImpl();
-//    records = new RecordsImpl();
-//    indexes = new IndexesImpl();
-//  }
-//
-//    @After
-//    public void close() {
-//            tableManager.closeDatabase();
-//            records.closeDatabase();
-//            }
-//  @Test
-//  public void unitTest1() {
-//    tableManager.dropAllTables();
-//
-//    // create the Employee Table, verify that the table is created
-//    TableMetadata EmployeeTable = new TableMetadata(EmployeeTableAttributeNames, EmployeeTableAttributeTypes,
-//        EmployeeTablePKAttributes);
-//    assertEquals(StatusCode.SUCCESS, tableManager.createTable(EmployeeTableName,
-//        EmployeeTableAttributeNames, EmployeeTableAttributeTypes, EmployeeTablePKAttributes));
-//    HashMap<String, TableMetadata> tables = tableManager.listTables();
-//    assertEquals(1, tables.size());
-//    assertEquals(EmployeeTable, tables.get(EmployeeTableName));
-//
-//    for (int i = 0; i<initialNumberOfRecords; i++) {
-//      long ssn = i;
-//      String name = getName(ssn);
-//      String email = getEmail(ssn);
-//      long age = getAge(ssn);
-//      String address = getAddress(ssn);
-//      long salary = getSalary(ssn);
-//
-//      Object[] primaryKeyVal = new Object[] {ssn};
-//      Object[] nonPrimaryKeyVal = new Object[] {name, email, age, address, salary};
-//
-//      assertEquals(StatusCode.SUCCESS, records.insertRecord(EmployeeTableName, EmployeeTablePKAttributes, primaryKeyVal, EmployeeTableNonPKAttributeNames, nonPrimaryKeyVal));
-//    }
-//
-//    // verify that the insertion succeeds
-//    Cursor cursor = records.openCursor(EmployeeTableName, Cursor.Mode.READ);
-//    assertNotNull(cursor);
-//
-//    // initialize the first record
-//    Record rec = records.getFirst(cursor);
-//    // verify the first record
-//    assertNotNull(rec);
-//    long ssn = 0;
-//    assertEquals(ssn, rec.getValueForGivenAttrName(SSN));
-//    assertEquals(getName(ssn), rec.getValueForGivenAttrName(Name));
-//    assertEquals(getEmail(ssn), rec.getValueForGivenAttrName(Email));
-//    assertEquals(getAge(ssn), rec.getValueForGivenAttrName(Age));
-//    assertEquals(getAddress(ssn), rec.getValueForGivenAttrName(Address));
-//    ssn++;
-//
-//    while (true) {
-//      rec = records.getNext(cursor);
-//      if (rec == null) {
-//        break;
-//      }
-//      assertEquals(ssn, rec.getValueForGivenAttrName(SSN));
-//      assertEquals(getName(ssn), rec.getValueForGivenAttrName(Name));
-//      assertEquals(getEmail(ssn), rec.getValueForGivenAttrName(Email));
-//      assertEquals(getAge(ssn), rec.getValueForGivenAttrName(Age));
-//      assertEquals(getAddress(ssn), rec.getValueForGivenAttrName(Address));
-//      assertEquals(getSalary(ssn), rec.getValueForGivenAttrName(Salary));
-//      ssn++;
-//    }
-//
-//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-//    assertEquals(ssn, initialNumberOfRecords);
-//
-//    // create the index
-//    assertEquals(StatusCode.SUCCESS, indexes.createIndex(EmployeeTableName, Email, IndexType.NON_CLUSTERED_HASH_INDEX));
-//    assertEquals(StatusCode.INDEX_ALREADY_EXISTS_ON_ATTRIBUTE, indexes.createIndex(EmployeeTableName, Email, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
-//
-//    System.out.println("Test1 passed!");
-//  }
-//
-//  @Test
-//  public void unitTest2() {
-//    assertEquals(StatusCode.SUCCESS, indexes.createIndex(EmployeeTableName, Salary, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
-//    Cursor cursor = records.openCursor(EmployeeTableName, Salary, 75, ComparisonOperator.LESS_THAN, Cursor.Mode.READ, true);
-//
-//    boolean isCursorInitialized = false;
-//    for (int i = 0; i < 75; i++) {
-//      Record record;
-//      if (!isCursorInitialized) {
-//        record = records.getFirst(cursor);
-//        isCursorInitialized = true;
-//      } else {
-//        record = records.getNext(cursor);
-//      }
-//
-//      long ssn = i;
-//      Record expectRecord = getExpectedEmployeeRecord(ssn);
-//      assertEquals(expectRecord, record);
-//    }
-//
-//    assertNull(records.getNext(cursor));
-//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-//
-//    assertNull(records.openCursor(EmployeeTableName, Age, 40, ComparisonOperator.LESS_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true));
-//    System.out.println("Test2 passed!");
-//  }
+package CSCI485ClassProject.test;
+
+import CSCI485ClassProject.Cursor;
+import CSCI485ClassProject.Indexes;
+import CSCI485ClassProject.IndexesImpl;
+import CSCI485ClassProject.Records;
+import CSCI485ClassProject.RecordsImpl;
+import CSCI485ClassProject.StatusCode;
+import CSCI485ClassProject.TableManager;
+import CSCI485ClassProject.TableManagerImpl;
+import CSCI485ClassProject.models.AttributeType;
+import CSCI485ClassProject.models.ComparisonOperator;
+import CSCI485ClassProject.models.IndexType;
+import CSCI485ClassProject.models.Record;
+import CSCI485ClassProject.models.TableMetadata;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+public class Part3Test {
+
+  public static String EmployeeTableName = "Employee";
+  public static String SSN = "SSN";
+  public static String Name = "Name";
+  public static String Email = "Email";
+  public static String Age = "Age";
+  public static String Address = "Address";
+  public static String Salary = "Salary";
+
+  public static String[] EmployeeTableAttributeNames = new String[]{SSN, Name, Email, Age, Address, Salary};
+  public static String[] EmployeeTableNonPKAttributeNames = new String[]{Name, Email, Age, Address, Salary};
+  public static AttributeType[] EmployeeTableAttributeTypes =
+      new AttributeType[]{AttributeType.INT, AttributeType.VARCHAR, AttributeType.VARCHAR, AttributeType.INT, AttributeType.VARCHAR, AttributeType.INT};
+
+  public static String[] UpdatedEmployeeTableNonPKAttributeNames = new String[]{Name, Email, Age, Address, Salary};
+  public static String[] EmployeeTablePKAttributes = new String[]{"SSN"};
+
+
+  public static int initialNumberOfRecords = 100;
+  public static int updatedNumberOfRecords = initialNumberOfRecords / 2;
+  public static int randSeed = 30;
+
+  private TableManager tableManager;
+  private Records records;
+  private Indexes indexes;
+
+  private long getPerfRandNumber(Random generator) {
+    long randomLong = generator.nextLong();
+
+    if (randomLong < 0) {
+      randomLong = -randomLong;
+    }
+    return randomLong;
+  }
+
+  private String getName(long i) {
+    return "Name" + i;
+  }
+
+  private String getEmail(long i) {
+    return "ABCDEFGH" + i + "@usc.edu";
+  }
+
+  private long getAge(long i) {
+    return (i+25)%90;
+  }
+
+  private String getAddress(long i) {
+    return "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + i;
+  }
+
+  private long getSalary(long i) {
+    return i;
+  }
+
+  private Record getExpectedEmployeeRecord(long ssn) {
+    Record rec = new Record();
+    String name = getName(ssn);
+    String email = getEmail(ssn);
+    long age = getAge(ssn);
+    String address = getAddress(ssn);
+    long salary = getSalary(ssn);
+
+    rec.setAttrNameAndValue(SSN, ssn);
+    rec.setAttrNameAndValue(Name, name);
+    rec.setAttrNameAndValue(Email, email);
+    rec.setAttrNameAndValue(Age, age);
+    rec.setAttrNameAndValue(Address, address);
+    rec.setAttrNameAndValue(Salary, salary);
+
+    return rec;
+  }
+
+
+  @Before
+  public void init(){
+    tableManager = new TableManagerImpl();
+    records = new RecordsImpl();
+    indexes = new IndexesImpl();
+  }
+
+  @After
+  public void close() {
+    tableManager.closeDatabase();
+    records.closeDatabase();
+    indexes.closeDatabase();
+  }
+  @Test
+  public void unitTest1() {
+    tableManager.dropAllTables();
+
+    // create the Employee Table, verify that the table is created
+    TableMetadata EmployeeTable = new TableMetadata(EmployeeTableAttributeNames, EmployeeTableAttributeTypes,
+        EmployeeTablePKAttributes);
+    assertEquals(StatusCode.SUCCESS, tableManager.createTable(EmployeeTableName,
+        EmployeeTableAttributeNames, EmployeeTableAttributeTypes, EmployeeTablePKAttributes));
+    HashMap<String, TableMetadata> tables = tableManager.listTables();
+    assertEquals(1, tables.size());
+    assertEquals(EmployeeTable, tables.get(EmployeeTableName));
+
+    for (int i = 0; i<initialNumberOfRecords; i++) {
+      long ssn = i;
+      String name = getName(ssn);
+      String email = getEmail(ssn);
+      long age = getAge(ssn);
+      String address = getAddress(ssn);
+      long salary = getSalary(ssn);
+
+      Object[] primaryKeyVal = new Object[] {ssn};
+      Object[] nonPrimaryKeyVal = new Object[] {name, email, age, address, salary};
+
+      assertEquals(StatusCode.SUCCESS, records.insertRecord(EmployeeTableName, EmployeeTablePKAttributes, primaryKeyVal, EmployeeTableNonPKAttributeNames, nonPrimaryKeyVal));
+    }
+
+    // verify that the insertion succeeds
+    Cursor cursor = records.openCursor(EmployeeTableName, Cursor.Mode.READ);
+    assertNotNull(cursor);
+
+    // initialize the first record
+    Record rec = records.getFirst(cursor);
+    // verify the first record
+    assertNotNull(rec);
+    long ssn = 0;
+    assertEquals(ssn, rec.getValueForGivenAttrName(SSN));
+    assertEquals(getName(ssn), rec.getValueForGivenAttrName(Name));
+    assertEquals(getEmail(ssn), rec.getValueForGivenAttrName(Email));
+    assertEquals(getAge(ssn), rec.getValueForGivenAttrName(Age));
+    assertEquals(getAddress(ssn), rec.getValueForGivenAttrName(Address));
+    ssn++;
+
+    while (true) {
+      rec = records.getNext(cursor);
+      if (rec == null) {
+        break;
+      }
+      assertEquals(ssn, rec.getValueForGivenAttrName(SSN));
+      assertEquals(getName(ssn), rec.getValueForGivenAttrName(Name));
+      assertEquals(getEmail(ssn), rec.getValueForGivenAttrName(Email));
+      assertEquals(getAge(ssn), rec.getValueForGivenAttrName(Age));
+      assertEquals(getAddress(ssn), rec.getValueForGivenAttrName(Address));
+      assertEquals(getSalary(ssn), rec.getValueForGivenAttrName(Salary));
+      ssn++;
+    }
+
+    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+    assertEquals(ssn, initialNumberOfRecords);
+
+    // create the index
+    assertEquals(StatusCode.SUCCESS, indexes.createIndex(EmployeeTableName, Email, IndexType.NON_CLUSTERED_HASH_INDEX));
+    assertEquals(StatusCode.INDEX_ALREADY_EXISTS_ON_ATTRIBUTE, indexes.createIndex(EmployeeTableName, Email, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
+
+    System.out.println("Test1 passed!");
+  }
+
+  @Test
+  public void unitTest2() {
+    assertEquals(StatusCode.SUCCESS, indexes.createIndex(EmployeeTableName, Salary, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
+    Cursor cursor = records.openCursor(EmployeeTableName, Salary, 75, ComparisonOperator.LESS_THAN, Cursor.Mode.READ, true);
+
+    boolean isCursorInitialized = false;
+    for (int i = 0; i < 75; i++) {
+      Record record;
+      if (!isCursorInitialized) {
+        record = records.getFirst(cursor);
+        isCursorInitialized = true;
+      } else {
+        record = records.getNext(cursor);
+      }
+
+      long ssn = i;
+      Record expectRecord = getExpectedEmployeeRecord(ssn);
+      assertEquals(expectRecord, record);
+    }
+
+    assertNull(records.getNext(cursor));
+    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+
+    assertNull(records.openCursor(EmployeeTableName, Age, 40, ComparisonOperator.LESS_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true));
+    System.out.println("Test2 passed!");
+  }
 //
 //
 //  @Test
@@ -432,4 +434,4 @@
 //    System.out.println("Query " + numOfQueries + " Records with non-clustered B+Tree index: " + executionTimeWithBPlusTreeIndex + " milliseconds");
 //    System.out.println("Test7 passed!");
 //  }
-//}
+}

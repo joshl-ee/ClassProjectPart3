@@ -1,5 +1,6 @@
 package CSCI485ClassProject;
 
+import CSCI485ClassProject.fdb.FDBHelper;
 import CSCI485ClassProject.models.IndexType;
 
 public interface Indexes {
@@ -23,4 +24,6 @@ public interface Indexes {
    * @return StatusCode
    */
   StatusCode dropIndex(String tableName, String attrName);
+
+  public void closeDatabase();
 }
