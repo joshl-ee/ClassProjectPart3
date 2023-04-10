@@ -55,9 +55,11 @@ public class IndexesImpl implements Indexes{
       Record currRecord;
 
       while (cursor.hasNext()) {
+        System.out.println("here");
         if (!cursor.isInitialized()) {
           currRecord = records.getFirst(cursor);
-        } else currRecord = records.getNext(cursor);
+        }
+        else currRecord = records.getNext(cursor);
 
         // Get hashValue of record on attrName
         int hashValue = currRecord.getHashCodeForGivenAttrName(attrName);
