@@ -42,14 +42,16 @@ public class IndexesImpl implements Indexes{
       FDBHelper.abortTransaction(tx);
       return StatusCode.INDEX_ALREADY_EXISTS_ON_ATTRIBUTE;
     }
-
     // Create hash index
     // TODO: Check if works
     if (indexType == IndexType.NON_CLUSTERED_HASH_INDEX) {
+      // Add "hash" to path to specify index type
+      indexPath.add("hash");
+
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord = new Record();
+      Record currRecord;
 
       while (cursor.hasNext()) {
         if (!cursor.isInitialized()) {
@@ -81,10 +83,22 @@ public class IndexesImpl implements Indexes{
     }
     // TODO: Create B+ tree index
     else {
+      // Add "bplus" to path to specify index type
+      indexPath.add("bplus");
 
+      // Open cursor on main data to loop through it
+      RecordsImpl records = new RecordsImpl();
+      Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
+      Record currRecord = new Record();
+
+      //
+
+      // Create key to specify midpoint
+
+      // Create two directories and sort based on midpoint
     }
 
-    return null;
+    return StatusCode.SUCCESS;
   }
 
   @Override
