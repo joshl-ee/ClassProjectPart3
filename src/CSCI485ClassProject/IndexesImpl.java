@@ -88,7 +88,7 @@ public class IndexesImpl implements Indexes{
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord = new Record();
+      Record currRecord = records.getFirst(cursor);
       boolean firstProcessed = false;
 
       while (cursor.hasNext() || !firstProcessed) {
