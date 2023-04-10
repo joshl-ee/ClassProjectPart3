@@ -46,20 +46,20 @@ public class IndexesImpl implements Indexes{
     // Create hash index
     // TODO: Check if works
     if (indexType == IndexType.NON_CLUSTERED_HASH_INDEX) {
+      System.out.println("Creating Non clustered hash index");
       // Add "hash" to path to specify index type
       indexPath.add("hash");
 
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord;
+      Record currRecord = records.getFirst(cursor);
+      boolean firstProcessed = false;
 
-      while (cursor.hasNext()) {
+      while (cursor.hasNext() || !firstProcessed) {
+        if (!firstProcessed) firstProcessed = true;
         System.out.println("here");
-        if (!cursor.isInitialized()) {
-          currRecord = records.getFirst(cursor);
-        }
-        else currRecord = records.getNext(cursor);
+        currRecord = records.getNext(cursor);
 
         // Get hashValue of record on attrName
         int hashValue = currRecord.getHashCodeForGivenAttrName(attrName);
