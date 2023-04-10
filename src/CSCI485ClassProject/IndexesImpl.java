@@ -42,6 +42,7 @@ public class IndexesImpl implements Indexes{
       FDBHelper.abortTransaction(tx);
       return StatusCode.INDEX_ALREADY_EXISTS_ON_ATTRIBUTE;
     }
+
     // Create hash index
     // TODO: Check if works
     if (indexType == IndexType.NON_CLUSTERED_HASH_INDEX) {
@@ -78,6 +79,7 @@ public class IndexesImpl implements Indexes{
 
         // Upload to FDB
         DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
+        System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
       }
     }
