@@ -204,6 +204,7 @@ public class Cursor {
   }
 
   private AsyncIterable<KeyValue> indexInitialize() {
+    System.out.println("initializing");
     // Set pointer to main data directory
     recordsTransformer = new RecordsTransformer(getTableName(), getTableMetadata());
     List<String> tablePath = recordsTransformer.getTableRecordPath();
@@ -219,6 +220,7 @@ public class Cursor {
     tablePath.add("bplus");
     if (FDBHelper.doesSubdirectoryExists(tx, tablePath)) {
       indexType = IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX;
+      System.out.println("It is bplus");
       rangeTuple = rangeTuple.add("bplus");
     }
     else  {
@@ -233,7 +235,7 @@ public class Cursor {
       rangeTuple = rangeTuple.addObject(predicateAttributeValue);
     }
 
-    Range dirRange = Range.startsWith(rangeTuple.pack());
+    Range dirRange = directorySubspace.range(rangeTuple);
     fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
 
     return fdbIterable;
