@@ -55,7 +55,7 @@ public class Cursor {
   private boolean isMoved = false;
   private FDBKVPair currentKVPair = null;
   private String attrName = null;
-  private IndexType;
+  private IndexType indexType;
 
   public Cursor(Mode mode, String tableName, TableMetadata tableMetadata, Transaction tx) {
     this.mode = mode;
