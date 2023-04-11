@@ -308,8 +308,8 @@ public class Cursor {
 
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        if (isUsingIndex)  record = moveToNextRecordIndex(true);
-        else record = moveToNextRecord(true);
+        if (isUsingIndex)  record = moveToNextRecordIndex(false);
+        else record = moveToNextRecord(false);
       }
     }
     return record;
@@ -345,8 +345,8 @@ public class Cursor {
     else record = moveToNextRecord(true);
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        if (isUsingIndex)  record = moveToNextRecordIndex(true);
-        else record = moveToNextRecord(true);
+        if (isUsingIndex)  record = moveToNextRecordIndex(false);
+        else record = moveToNextRecord(false);
       }
     }
     return record;
@@ -369,8 +369,8 @@ public class Cursor {
     else record = moveToNextRecord(false);
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        if (attrName != null)  record = moveToNextRecordIndex(true);
-        else record = moveToNextRecord(true);
+        if (attrName != null)  record = moveToNextRecordIndex(false);
+        else record = moveToNextRecord(false);
       }
     }
     return record;
