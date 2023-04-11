@@ -282,6 +282,7 @@ public class Cursor {
       currentKVPair = null;
     }
 
+    System.out.println(currentRecord.getMapAttrNameToValue());
     return currentRecord;
   }
 
