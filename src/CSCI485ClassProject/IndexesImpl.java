@@ -105,7 +105,7 @@ public class IndexesImpl implements Indexes{
 
         // Create the indexed record's key tuple. This is (attrValue, primaryKey0, primaryKey1..., primaryKeyN).
         Tuple keyTuple = new Tuple();
-        System.out.println("Adding into index: " + attrValue);
+        //System.out.println("Adding into index: " + attrValue);
         keyTuple = keyTuple.addObject(attrValue); // Used to have .add(indexType). I don't think this is necessary anymore.
 
         TableMetadata metadata = getTableMetadataByTableName(tx, tableName);

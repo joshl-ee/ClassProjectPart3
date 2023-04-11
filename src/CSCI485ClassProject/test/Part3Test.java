@@ -197,6 +197,12 @@ public class Part3Test {
 
       long ssn = i;
       Record expectRecord = getExpectedEmployeeRecord(ssn);
+      System.out.println("Name: " + expectRecord.getValueForGivenAttrName("Name"));
+      System.out.println("Email: " + expectRecord.getValueForGivenAttrName("Email"));
+      System.out.println("Age: " + expectRecord.getValueForGivenAttrName("Age"));
+      System.out.println("Address: " + expectRecord.getValueForGivenAttrName("Address"));
+      System.out.println("Salary: " + expectRecord.getValueForGivenAttrName("Salary"));
+
       assertEquals(expectRecord, record);
     }
 
