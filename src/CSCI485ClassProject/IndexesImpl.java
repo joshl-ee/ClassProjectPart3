@@ -50,7 +50,7 @@ public class IndexesImpl implements Indexes{
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord = records.getFirst(cursor);
+      Record currRecord;
       boolean firstProcessed = false;
       // Upload to FDB. Add "hash" to path to specify index type
       indexPath.add("hash");
@@ -89,7 +89,7 @@ public class IndexesImpl implements Indexes{
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord = records.getFirst(cursor);
+      Record currRecord;
       boolean firstProcessed = false;
       // Upload to FDB. Add "bplus" to path to specify index type
       indexPath.add("bplus");
