@@ -221,9 +221,11 @@ public class Cursor {
     if (FDBHelper.doesSubdirectoryExists(tx, tablePath)) {
       indexType = IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX;
       System.out.println("It is bplus");
+      rangeTuple = rangeTuple.add("bplus");
     }
     else  {
       indexType = IndexType.NON_CLUSTERED_HASH_INDEX;
+      rangeTuple = rangeTuple.add("hash");
     }
 
     // Set iterable object
@@ -233,7 +235,7 @@ public class Cursor {
       rangeTuple = rangeTuple.addObject(predicateAttributeValue);
     }
 
-    Range dirRange = directorySubspace.range(rangeTuple);
+    Range dirRange = indexSubspace.range(rangeTuple);
     fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
 
     return fdbIterable;
