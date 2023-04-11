@@ -213,25 +213,29 @@ public class Cursor {
     tablePath.set(tablePath.size()-1, attrName);
     indexSubspace = FDBHelper.openSubspace(getTx(), tablePath);
 
+    Tuple rangeTuple = new Tuple();
+
     // Check if bplus or index
     tablePath.add("bplus");
     if (FDBHelper.doesSubdirectoryExists(tx, tablePath)) {
       indexType = IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX;
+      rangeTuple = rangeTuple.add("bplus");
     }
-    else  indexType = IndexType.NON_CLUSTERED_HASH_INDEX;
+    else  {
+      indexType = IndexType.NON_CLUSTERED_HASH_INDEX;
+      rangeTuple = rangeTuple.add("hash");
+    }
 
     // Set iterable object
     AsyncIterable<KeyValue> fdbIterable;
     // If predicate mode is equalsTo, iterator must start pointing at attrValue
     if (predicateOperator == ComparisonOperator.EQUAL_TO) {
-      Tuple rangeTuple = new Tuple();
-      if (indexType == IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX) rangeTuple.add("bplus");
-      else rangeTuple.add("hash");
       rangeTuple = rangeTuple.addObject(predicateAttributeValue);
-      Range dirRange = Range.startsWith(rangeTuple.pack());
-      fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
     }
-    else fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
+
+    Range dirRange = Range.startsWith(rangeTuple.pack());
+    fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
+
     return fdbIterable;
   }
   private Record moveToNextRecordIndex(boolean isInitializing) {
@@ -242,10 +246,12 @@ public class Cursor {
     // Initialize
     if (isInitializing) {
       AsyncIterable<KeyValue> fdbIterable = indexInitialize();
-      if (fdbIterable != null) iterator = fdbIterable.iterator();
+      if (fdbIterable != null) {
+        iterator = fdbIterable.iterator();
+        isInitialized = true;
+      }
     }
 
-    isInitialized = true;
 
     // reset the currentRecord
     currentRecord = null;
