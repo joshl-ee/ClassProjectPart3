@@ -256,7 +256,7 @@ public class Cursor {
     boolean nextExists = false;
 
     Tuple tempPkValTuple;
-    while (pkValTuple != null) {
+    while (newIterator != null && newIterator.hasNext()) {
       KeyValue kv = newIterator.next();
       Tuple keyTuple = directorySubspace.unpack(kv.getKey());
       Tuple valTuple = Tuple.fromBytes(kv.getValue());
@@ -282,7 +282,7 @@ public class Cursor {
       currentKVPair = null;
     }
 
-    System.out.println(currentRecord.getMapAttrNameToValue().get("Salary").getValue());
+    System.out.println("Salary: " + currentRecord.getMapAttrNameToValue().get("Salary").getValue());
     return currentRecord;
   }
 
