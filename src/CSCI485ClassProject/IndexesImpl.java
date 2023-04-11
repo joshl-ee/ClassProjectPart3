@@ -125,6 +125,8 @@ public class IndexesImpl implements Indexes{
 
     //System.out.println("Made " + indexPath);
     FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
+
+    FDBHelper.commitTransaction(tx);
     return StatusCode.SUCCESS;
   }
 
