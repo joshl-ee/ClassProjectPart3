@@ -210,26 +210,25 @@ public class Cursor {
     List<String> tablePath = recordsTransformer.getTableRecordPath();
     directorySubspace = FDBHelper.openSubspace(getTx(), tablePath);
 
-    // Set pointer to index structure directory
     tablePath.set(tablePath.size()-1, attrName);
-    indexSubspace = FDBHelper.openSubspace(getTx(), tablePath);
-
-    Tuple rangeTuple = new Tuple();
-
     // Check if bplus or index
     tablePath.add("bplus");
     if (FDBHelper.doesSubdirectoryExists(tx, tablePath)) {
       indexType = IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX;
       System.out.println("It is bplus");
-      rangeTuple = rangeTuple.add("bplus");
     }
     else  {
       indexType = IndexType.NON_CLUSTERED_HASH_INDEX;
-      rangeTuple = rangeTuple.add("hash");
+      tablePath.set(tablePath.size()-1, "hash");
     }
+
+    // Set pointer to index structure directory
+    indexSubspace = FDBHelper.openSubspace(getTx(), tablePath);
+
 
     // Set iterable object
     AsyncIterable<KeyValue> fdbIterable;
+    Tuple rangeTuple = new Tuple();
     // If predicate mode is equalsTo, iterator must start pointing at attrValue
     if (predicateOperator == ComparisonOperator.EQUAL_TO) {
       rangeTuple = rangeTuple.addObject(predicateAttributeValue);
