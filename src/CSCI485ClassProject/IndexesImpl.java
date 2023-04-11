@@ -118,7 +118,6 @@ public class IndexesImpl implements Indexes{
         // Create the indexed record's value tuple. This is ().
         Tuple valueTuple = new Tuple();
 
-
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
       }

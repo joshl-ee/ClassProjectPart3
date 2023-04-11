@@ -260,7 +260,7 @@ public class Cursor {
     currentRecord = null;
 
     // no such directory, or no records under the directory
-    if (directorySubspace == null || !hasNext()) {
+    if (indexSubspace == null || !hasNext()) {
       System.out.println("Here?");
       return null;
     }
