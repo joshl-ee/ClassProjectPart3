@@ -215,7 +215,7 @@ public class Cursor {
     tablePath.add("bplus");
     if (FDBHelper.doesSubdirectoryExists(tx, tablePath)) {
       indexType = IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX;
-      System.out.println("It is bplus");
+    //  System.out.println("It is bplus");
     }
     else  {
       indexType = IndexType.NON_CLUSTERED_HASH_INDEX;
@@ -224,7 +224,6 @@ public class Cursor {
 
     // Set pointer to index structure directory
     indexSubspace = FDBHelper.openSubspace(getTx(), tablePath);
-
 
     // Set iterable object
     AsyncIterable<KeyValue> fdbIterable;
@@ -250,8 +249,8 @@ public class Cursor {
       if (fdbIterable != null) {
         iterator = fdbIterable.iterator();
         isInitialized = true;
-        System.out.println("here");
-        System.out.println("Iterator has next: " + iterator.hasNext());
+        //System.out.println("here");
+        //System.out.println("Iterator has next: " + iterator.hasNext());
       }
     }
 
