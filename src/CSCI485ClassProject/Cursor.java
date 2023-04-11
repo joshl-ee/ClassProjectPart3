@@ -5,6 +5,7 @@ import CSCI485ClassProject.fdb.FDBKVPair;
 import CSCI485ClassProject.models.*;
 import CSCI485ClassProject.models.Record;
 import CSCI485ClassProject.utils.ComparisonUtils;
+import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.Transaction;
 import com.apple.foundationdb.async.AsyncIterable;
@@ -215,10 +216,10 @@ public class Cursor {
       directorySubspace = FDBHelper.openSubspace(tx, tablePath);
       if (attrName != null) {
         tablePath.set(tablePath.size()-1, attrName);
+        indexSubspace = FDBHelper.openSubspace(tx, tablePath);
+        tablePath.add("bplus");
+        System.out.println("Does bplus index exist? " + FDBHelper.doesSubdirectoryExists(tx, tablePath));
       }
-      indexSubspace = FDBHelper.openSubspace(tx, tablePath);
-      Tuple check = new Tuple().add("bplus");
-      System.out.println("Type: " + FDBHelper.getCertainKeyValuePairInSubdirectory(indexSubspace, tx, check, new ArrayList<String>()).getKey().get(0));
       AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
       if (fdbIterable != null)
         iterator = fdbIterable.iterator();
