@@ -282,7 +282,7 @@ public class Cursor {
       currentKVPair = null;
     }
 
-    System.out.println(currentRecord.getMapAttrNameToValue().get("Salary"));
+    System.out.println(currentRecord.getMapAttrNameToValue().get("Salary").getValue());
     return currentRecord;
   }
 
