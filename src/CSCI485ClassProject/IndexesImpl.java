@@ -52,7 +52,9 @@ public class IndexesImpl implements Indexes{
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
       Record currRecord = records.getFirst(cursor);
       boolean firstProcessed = false;
+      // Upload to FDB. Add "hash" to path to specify index type
       indexPath.add("hash");
+      DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
@@ -77,8 +79,7 @@ public class IndexesImpl implements Indexes{
         // Create the indexed record's value tuple. This is ().
         Tuple valueTuple = new Tuple();
 
-        // Upload to FDB. Add "hash" to path to specify index type
-        DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
+
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
       }
@@ -90,7 +91,9 @@ public class IndexesImpl implements Indexes{
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
       Record currRecord = records.getFirst(cursor);
       boolean firstProcessed = false;
+      // Upload to FDB. Add "bplus" to path to specify index type
       indexPath.add("bplus");
+      DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
@@ -115,8 +118,7 @@ public class IndexesImpl implements Indexes{
         // Create the indexed record's value tuple. This is ().
         Tuple valueTuple = new Tuple();
 
-        // Upload to FDB. Add "bplus" to path to specify index type
-        DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
+
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
       }
