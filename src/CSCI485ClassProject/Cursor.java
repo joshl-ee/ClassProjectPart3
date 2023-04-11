@@ -5,9 +5,7 @@ import CSCI485ClassProject.fdb.FDBKVPair;
 import CSCI485ClassProject.models.*;
 import CSCI485ClassProject.models.Record;
 import CSCI485ClassProject.utils.ComparisonUtils;
-import com.apple.foundationdb.FDB;
-import com.apple.foundationdb.KeyValue;
-import com.apple.foundationdb.Transaction;
+import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import com.apple.foundationdb.directory.DirectorySubspace;
@@ -57,6 +55,7 @@ public class Cursor {
   private FDBKVPair currentKVPair = null;
   private String attrName = null;
   private IndexType indexType;
+  private boolean isUsingIndex = false;
 
   public Cursor(Mode mode, String tableName, TableMetadata tableMetadata, Transaction tx) {
     this.mode = mode;
@@ -72,6 +71,7 @@ public class Cursor {
     this.tableMetadata = tableMetadata;
     this.tx = tx;
     this.attrName = attrName;
+    isUsingIndex = true;
   }
 
   public void setTx(Transaction tx) {
@@ -203,29 +203,50 @@ public class Cursor {
     return currentRecord;
   }
 
+  private AsyncIterable<KeyValue> indexInitialize() {
+    // Set pointer to main data directory
+    recordsTransformer = new RecordsTransformer(getTableName(), getTableMetadata());
+    List<String> tablePath = recordsTransformer.getTableRecordPath();
+    directorySubspace = FDBHelper.openSubspace(getTx(), tablePath);
+
+    // Set pointer to index structure directory
+    tablePath.set(tablePath.size()-1, attrName);
+    indexSubspace = FDBHelper.openSubspace(getTx(), tablePath);
+
+    // Check if bplus or index
+    tablePath.add("bplus");
+    if (FDBHelper.doesSubdirectoryExists(tx, tablePath)) {
+      indexType = IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX;
+    }
+    else  indexType = IndexType.NON_CLUSTERED_HASH_INDEX;
+
+    // Set iterable object
+    AsyncIterable<KeyValue> fdbIterable;
+    // If predicate mode is equalsTo, iterator must start pointing at attrValue
+    if (predicateOperator == ComparisonOperator.EQUAL_TO) {
+      Tuple rangeTuple = new Tuple();
+      if (indexType == IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX) rangeTuple.add("bplus");
+      else rangeTuple.add("hash");
+      rangeTuple = rangeTuple.addObject(predicateAttributeValue);
+      Range dirRange = Range.startsWith(rangeTuple.pack());
+      fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
+    }
+    else fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
+    return fdbIterable;
+  }
   private Record moveToNextRecordIndex(boolean isInitializing) {
     if (!isInitializing && !isInitialized) {
       return null;
     }
 
+    // Initialize
     if (isInitializing) {
-      // initialize the subspace and the iterator
-      recordsTransformer = new RecordsTransformer(getTableName(), getTableMetadata());
-      List<String> tablePath = recordsTransformer.getTableRecordPath();
-      // Add the path of the index structure if using
-      directorySubspace = FDBHelper.openSubspace(tx, tablePath);
-      if (attrName != null) {
-        tablePath.set(tablePath.size()-1, attrName);
-        indexSubspace = FDBHelper.openSubspace(tx, tablePath);
-        tablePath.add("bplus");
-        System.out.println("Does bplus index exist? " + FDBHelper.doesSubdirectoryExists(tx, tablePath));
-      }
       AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
-      if (fdbIterable != null)
-        iterator = fdbIterable.iterator();
-
-      isInitialized = true;
+      if (fdbIterable != null) iterator = indexInitialize().iterator();
     }
+
+    isInitialized = true;
+
     // reset the currentRecord
     currentRecord = null;
 
@@ -237,10 +258,8 @@ public class Cursor {
     List<String> recordStorePath = recordsTransformer.getTableRecordPath();
     List<FDBKVPair> fdbkvPairs = new ArrayList<>();
 
-
-    Tuple pkValTuple = null;
+    Tuple pkValTuple;
     AsyncIterator<KeyValue> newIterator = null;
-    boolean isSavePK = false;
 
     // Get records from main data using index structure
     if (iterator.hasNext()) {
@@ -250,38 +269,19 @@ public class Cursor {
       // Get primary key
       pkValTuple = keyTuple.popFront();
 
-      newIterator = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(directorySubspace, tx, pkValTuple, false).iterator();
-      isSavePK = true;
+      newIterator = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(directorySubspace, tx, pkValTuple, isInitializedToLast).iterator();
     }
 
-    isMoved = true;
-    boolean nextExists = false;
-
-    Tuple tempPkValTuple;
     while (newIterator != null && newIterator.hasNext()) {
       KeyValue kv = newIterator.next();
       Tuple keyTuple = directorySubspace.unpack(kv.getKey());
       Tuple valTuple = Tuple.fromBytes(kv.getValue());
       FDBKVPair kvPair = new FDBKVPair(recordStorePath, keyTuple, valTuple);
-      tempPkValTuple = getPrimaryKeyValTuple(keyTuple);
-      if (!isSavePK) {
-        pkValTuple = tempPkValTuple;
-        isSavePK = true;
-      } else if (!pkValTuple.equals(tempPkValTuple)){
-        // when pkVal change, stop there
-        currentKVPair = kvPair;
-        nextExists = true;
-        break;
-      }
       fdbkvPairs.add(kvPair);
     }
 
     if (!fdbkvPairs.isEmpty()) {
       currentRecord = recordsTransformer.convertBackToRecord(fdbkvPairs);
-    }
-
-    if (!nextExists) {
-      currentKVPair = null;
     }
 
     System.out.println("Salary: " + currentRecord.getMapAttrNameToValue().get("Salary").getValue());
