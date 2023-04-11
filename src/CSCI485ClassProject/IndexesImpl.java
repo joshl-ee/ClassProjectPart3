@@ -50,7 +50,7 @@ public class IndexesImpl implements Indexes{
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord;
+      Record currRecord = records.getFirst(cursor);
       boolean firstProcessed = false;
       // Upload to FDB. Add "hash" to path to specify index type
       indexPath.add("hash");
@@ -59,7 +59,7 @@ public class IndexesImpl implements Indexes{
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
         //System.out.println("here");
-        currRecord = records.getNext(cursor);
+        else currRecord = records.getNext(cursor);
 
         // Get hashValue of record on attrName
         int hashValue = currRecord.getHashCodeForGivenAttrName(attrName);
@@ -89,7 +89,7 @@ public class IndexesImpl implements Indexes{
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
       Cursor cursor = records.openCursor(tableName, Cursor.Mode.READ);
-      Record currRecord;
+      Record currRecord = records.getFirst(cursor);
       boolean firstProcessed = false;
       // Upload to FDB. Add "bplus" to path to specify index type
       indexPath.add("bplus");
@@ -98,7 +98,7 @@ public class IndexesImpl implements Indexes{
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
         //System.out.println("here");
-        currRecord = records.getNext(cursor);
+        else currRecord = records.getNext(cursor);
 
         // Get attrValue of record on attrName
         Object attrValue = currRecord.getValueForGivenAttrName(attrName);
