@@ -55,6 +55,7 @@ public class IndexesImpl implements Indexes{
       // Upload to FDB. Add "hash" to path to specify index type
       indexPath.add("hash");
       FDBHelper.createOrOpenSubspace(tx, indexPath);
+      FDBHelper.commitTransaction(tx);
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
@@ -74,6 +75,7 @@ public class IndexesImpl implements Indexes{
       // Upload to FDB. Add "bplus" to path to specify index type
       indexPath.add("bplus");
       FDBHelper.createOrOpenSubspace(tx, indexPath);
+      FDBHelper.commitTransaction(tx);
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
@@ -84,7 +86,6 @@ public class IndexesImpl implements Indexes{
       }
     }
 
-    FDBHelper.commitTransaction(tx);
     return StatusCode.SUCCESS;
   }
 
