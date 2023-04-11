@@ -187,7 +187,7 @@ public class Part3Test {
     boolean isCursorInitialized = false;
     for (int i = 0; i < 75; i++) {
       Record record;
-      System.out.println("i: " + i);
+      //System.out.println("i: " + i);
       if (!isCursorInitialized) {
         record = records.getFirst(cursor);
         isCursorInitialized = true;

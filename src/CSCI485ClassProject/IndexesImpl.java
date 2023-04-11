@@ -30,7 +30,7 @@ public class IndexesImpl implements Indexes{
 
   @Override
   public StatusCode createIndex(String tableName, String attrName, IndexType indexType) {
-    Transaction tx = db.createTransaction();
+    Transaction tx = FDBHelper.openTransaction(db);
 
     // Create path for index structure
     List<String> indexPath = new ArrayList<>();
@@ -54,34 +54,14 @@ public class IndexesImpl implements Indexes{
       boolean firstProcessed = false;
       // Upload to FDB. Add "hash" to path to specify index type
       indexPath.add("hash");
-      DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
+      FDBHelper.createOrOpenSubspace(tx, indexPath);
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
         //System.out.println("here");
         else currRecord = records.getNext(cursor);
-
-        // Get hashValue of record on attrName
-        int hashValue = currRecord.getHashCodeForGivenAttrName(attrName);
-
-        // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
-        Tuple keyTuple = new Tuple();
-        keyTuple = keyTuple.add(hashValue); // Used to have .add(indexType). I don't think this is necessary anymore.
-
-        TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
-        List<String> pkNames = metadata.getPrimaryKeys();
-        Collections.sort(pkNames);
-
-        for (String pk : pkNames) {
-          keyTuple = keyTuple.addObject(currRecord.getValueForGivenAttrName(pk));
-        }
-
-        // Create the indexed record's value tuple. This is ().
-        Tuple valueTuple = new Tuple();
-
-
-        //System.out.println("Made " + indexPath);
-        FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
+        // Add record to index
+        addRecordToIndex(tableName, currRecord, attrName);
       }
     }
     // Create B+ tree index
@@ -93,38 +73,57 @@ public class IndexesImpl implements Indexes{
       boolean firstProcessed = false;
       // Upload to FDB. Add "bplus" to path to specify index type
       indexPath.add("bplus");
-      DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
+      FDBHelper.createOrOpenSubspace(tx, indexPath);
 
       while (cursor.hasNext() || !firstProcessed) {
         if (!firstProcessed) firstProcessed = true;
         //System.out.println("here");
         else currRecord = records.getNext(cursor);
-
-        // Get attrValue of record on attrName
-        Object attrValue = currRecord.getValueForGivenAttrName(attrName);
-
-        // Create the indexed record's key tuple. This is (attrValue, primaryKey0, primaryKey1..., primaryKeyN).
-        Tuple keyTuple = new Tuple();
-        //System.out.println("Adding into index: " + attrValue);
-        keyTuple = keyTuple.addObject(attrValue); // Used to have .add(indexType). I don't think this is necessary anymore.
-
-        TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
-        List<String> pkNames = metadata.getPrimaryKeys();
-        Collections.sort(pkNames);
-
-        for (String pk : pkNames) {
-          keyTuple = keyTuple.addObject(currRecord.getValueForGivenAttrName(pk));
-        }
-
-        // Create the indexed record's value tuple. This is ().
-        Tuple valueTuple = new Tuple();
-
-        //System.out.println("Made " + indexPath);
-        FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
+        // Add record to index
+        addRecordToIndex(tableName, currRecord, attrName);
       }
     }
 
     FDBHelper.commitTransaction(tx);
+    return StatusCode.SUCCESS;
+  }
+
+  public StatusCode addRecordToIndex(String tableName, Record record, String attrName) {
+    Transaction tx = FDBHelper.openTransaction(db);
+    // Check index type
+    List<String> indexPath = new ArrayList<>();
+    indexPath.add(tableName);
+    indexPath.add(attrName);
+    Tuple keyTuple = new Tuple();
+
+    // Check if bplus or index
+    indexPath.add("bplus");
+    if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+      keyTuple = keyTuple.addObject(record.getValueForGivenAttrName(attrName));
+    }
+    else  {
+      indexPath.set(indexPath.size()-1, "hash");
+      int hashValue = record.getHashCodeForGivenAttrName(attrName);
+      keyTuple = keyTuple.addObject(hashValue); // Used to have .add(indexType). I don't think this is necessary anymore.
+    }
+
+    DirectorySubspace indexSubspace = FDBHelper.openSubspace(tx, indexPath);
+
+    // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
+
+    TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
+    List<String> pkNames = metadata.getPrimaryKeys();
+    Collections.sort(pkNames);
+
+    for (String pk : pkNames) {
+      keyTuple = keyTuple.addObject(record.getValueForGivenAttrName(pk));
+    }
+
+    // Create the indexed record's value tuple. This is ().
+    Tuple valueTuple = new Tuple();
+
+    //System.out.println("Made " + indexPath);
+    FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
     return StatusCode.SUCCESS;
   }
 

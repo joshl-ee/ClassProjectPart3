@@ -259,7 +259,7 @@ public class Cursor {
 
     // no such directory, or no records under the directory
     if (indexSubspace == null || !hasNext()) {
-      System.out.println("Here?");
+      //System.out.println("Here?");
       return null;
     }
 
