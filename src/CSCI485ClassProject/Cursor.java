@@ -292,7 +292,7 @@ public class Cursor {
       currentRecord = recordsTransformer.convertBackToRecord(fdbkvPairs);
     }
 
-    System.out.println("PK: + " currentRecord.getMapAttrNameToValue().get("SSN").getValue());
+    System.out.println("PK: + " + currentRecord.getMapAttrNameToValue().get("SSN").getValue());
     System.out.println("Salary: " + currentRecord.getMapAttrNameToValue().get("Salary").getValue());
     return currentRecord;
   }
