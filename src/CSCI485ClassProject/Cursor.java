@@ -251,6 +251,7 @@ public class Cursor {
       if (fdbIterable != null) {
         iterator = fdbIterable.iterator();
         isInitialized = true;
+        System.out.println("here");
       }
     }
 
