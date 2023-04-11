@@ -77,13 +77,13 @@ public class IndexesImpl implements Indexes{
         Tuple valueTuple = new Tuple();
 
         // Upload to FDB. Add "hash" to path to specify index type
-        //indexPath.add("hash");
+        indexPath.add("hash");
         DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
       }
     }
-    // TODO: Create B+ tree index
+    // Create B+ tree index
     else {
       // Open cursor on main data to loop through it
       RecordsImpl records = new RecordsImpl();
@@ -115,7 +115,7 @@ public class IndexesImpl implements Indexes{
         Tuple valueTuple = new Tuple();
 
         // Upload to FDB. Add "bplus" to path to specify index type
-        //indexPath.add("bplus");
+        indexPath.add("bplus");
         DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));

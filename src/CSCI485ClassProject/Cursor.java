@@ -2,10 +2,8 @@ package CSCI485ClassProject;
 
 import CSCI485ClassProject.fdb.FDBHelper;
 import CSCI485ClassProject.fdb.FDBKVPair;
-import CSCI485ClassProject.models.AttributeType;
-import CSCI485ClassProject.models.ComparisonOperator;
+import CSCI485ClassProject.models.*;
 import CSCI485ClassProject.models.Record;
-import CSCI485ClassProject.models.TableMetadata;
 import CSCI485ClassProject.utils.ComparisonUtils;
 import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.Transaction;
@@ -57,6 +55,7 @@ public class Cursor {
   private boolean isMoved = false;
   private FDBKVPair currentKVPair = null;
   private String attrName = null;
+  private IndexType;
 
   public Cursor(Mode mode, String tableName, TableMetadata tableMetadata, Transaction tx) {
     this.mode = mode;
@@ -218,6 +217,7 @@ public class Cursor {
         tablePath.set(tablePath.size()-1, attrName);
       }
       indexSubspace = FDBHelper.openSubspace(tx, tablePath);
+      System.out.println(FDBHelper.getCertainKeyValuePairInSubdirectory(indexSubspace, tx, new Tuple(), new ArrayList<String>()).getKey().get(0));
       AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
       if (fdbIterable != null)
         iterator = fdbIterable.iterator();
