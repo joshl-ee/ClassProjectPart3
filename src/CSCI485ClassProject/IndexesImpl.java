@@ -22,7 +22,7 @@ public class IndexesImpl implements Indexes{
   }
   private TableMetadata getTableMetadataByTableName(Transaction tx, String tableName) {
     TableMetadataTransformer tblMetadataTransformer = new TableMetadataTransformer(tableName);
-    List<FDBKVPair> kvPairs = FDBHelper.getAllKeyValuePairsOfSubdirectory(db, tx,
+    List<FDBKVPair> kvPairs = FDBHelper.getAllKeyValuePairsOfSubdirectory(tx,
             tblMetadataTransformer.getTableAttributeStorePath());
     TableMetadata tblMetadata = tblMetadataTransformer.convertBackToTableMetadata(kvPairs);
     return tblMetadata;
@@ -77,7 +77,7 @@ public class IndexesImpl implements Indexes{
         Tuple valueTuple = new Tuple();
 
         // Upload to FDB. Add "hash" to path to specify index type
-        indexPath.add("hash");
+        //indexPath.add("hash");
         DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
@@ -99,7 +99,7 @@ public class IndexesImpl implements Indexes{
         // Get attrValue of record on attrName
         Object attrValue = currRecord.getValueForGivenAttrName(attrName);
 
-        // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
+        // Create the indexed record's key tuple. This is (attrValue, primaryKey0, primaryKey1..., primaryKeyN).
         Tuple keyTuple = new Tuple();
         keyTuple = keyTuple.addObject(attrValue); // Used to have .add(indexType). I don't think this is necessary anymore.
 
@@ -115,7 +115,7 @@ public class IndexesImpl implements Indexes{
         Tuple valueTuple = new Tuple();
 
         // Upload to FDB. Add "bplus" to path to specify index type
-        indexPath.add("bplus");
+        //indexPath.add("bplus");
         DirectorySubspace indexSubspace = FDBHelper.createOrOpenSubspace(tx, indexPath);
         //System.out.println("Made " + indexPath);
         FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));

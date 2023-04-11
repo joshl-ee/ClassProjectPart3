@@ -87,7 +87,7 @@ public class FDBHelper {
     return subpaths;
   }
 
-  public static List<FDBKVPair> getAllKeyValuePairsOfSubdirectory(Database db, Transaction tx, List<String> path) {
+  public static List<FDBKVPair> getAllKeyValuePairsOfSubdirectory(Transaction tx, List<String> path) {
     List<FDBKVPair> res = new ArrayList<>();
     if (!doesSubdirectoryExists(tx, path)) {
       return res;

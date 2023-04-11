@@ -104,7 +104,7 @@ public class TableManagerImpl implements TableManager{
     for (String tblName : existingTableNames) {
       TableMetadataTransformer tblTransformer = new TableMetadataTransformer(tblName);
       List<String> tblAttributeDirPath = tblTransformer.getTableAttributeStorePath();
-      List<FDBKVPair> kvPairs = FDBHelper.getAllKeyValuePairsOfSubdirectory(db, readTx, tblAttributeDirPath);
+      List<FDBKVPair> kvPairs = FDBHelper.getAllKeyValuePairsOfSubdirectory(readTx, tblAttributeDirPath);
       TableMetadata tblMetadata = tblTransformer.convertBackToTableMetadata(kvPairs);
       res.put(tblName, tblMetadata);
     }

@@ -29,7 +29,7 @@ public class RecordsImpl implements Records{
 
   private TableMetadata getTableMetadataByTableName(Transaction tx, String tableName) {
     TableMetadataTransformer tblMetadataTransformer = new TableMetadataTransformer(tableName);
-    List<FDBKVPair> kvPairs = FDBHelper.getAllKeyValuePairsOfSubdirectory(db, tx,
+    List<FDBKVPair> kvPairs = FDBHelper.getAllKeyValuePairsOfSubdirectory(tx,
             tblMetadataTransformer.getTableAttributeStorePath());
     TableMetadata tblMetadata = tblMetadataTransformer.convertBackToTableMetadata(kvPairs);
     return tblMetadata;
@@ -155,6 +155,15 @@ public class RecordsImpl implements Records{
       return null;
     }
 
+    // Check if index table exists
+    List<String> indexPath = new ArrayList<>();
+    indexPath.add(tableName);
+    indexPath.add(attrName);
+    if (isUsingIndex && !FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+      FDBHelper.abortTransaction(tx);
+      return null;
+    }
+
     TableMetadata tblMetadata = getTableMetadataByTableName(tx, tableName);
 
     // check if the given attribute exists
@@ -163,7 +172,11 @@ public class RecordsImpl implements Records{
       return null;
     }
 
-    Cursor cursor = new Cursor(mode, tableName, tblMetadata, tx);
+    // Make cursor depending on implementation
+    Cursor cursor;
+    if (isUsingIndex)  cursor = new Cursor(mode, tableName, tblMetadata, tx, attrName);
+    else cursor = new Cursor(mode, tableName, tblMetadata, tx);
+
     Record.Value attrVal = new Record.Value();
     StatusCode initVal = attrVal.setValue(attrValue);
     if (initVal != StatusCode.SUCCESS) {

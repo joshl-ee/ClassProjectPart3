@@ -14,6 +14,7 @@ import com.apple.foundationdb.async.AsyncIterator;
 import com.apple.foundationdb.directory.DirectorySubspace;
 import com.apple.foundationdb.tuple.Tuple;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,15 +53,25 @@ public class Cursor {
   private Transaction tx;
 
   private DirectorySubspace directorySubspace;
-
+  private DirectorySubspace indexSubspace;
   private boolean isMoved = false;
   private FDBKVPair currentKVPair = null;
+  private String attrName = null;
 
   public Cursor(Mode mode, String tableName, TableMetadata tableMetadata, Transaction tx) {
     this.mode = mode;
     this.tableName = tableName;
     this.tableMetadata = tableMetadata;
     this.tx = tx;
+  }
+
+  // Constructor when using index
+  public Cursor(Mode mode, String tableName, TableMetadata tableMetadata, Transaction tx, String attrName) {
+    this.mode = mode;
+    this.tableName = tableName;
+    this.tableMetadata = tableMetadata;
+    this.tx = tx;
+    this.attrName = attrName;
   }
 
   public void setTx(Transaction tx) {
@@ -192,16 +203,103 @@ public class Cursor {
     return currentRecord;
   }
 
+  private Record moveToNextRecordIndex(boolean isInitializing) {
+    if (!isInitializing && !isInitialized) {
+      return null;
+    }
+
+    if (isInitializing) {
+      // initialize the subspace and the iterator
+      recordsTransformer = new RecordsTransformer(getTableName(), getTableMetadata());
+      List<String> tablePath = recordsTransformer.getTableRecordPath();
+      // Add the path of the index structure if using
+      directorySubspace = FDBHelper.openSubspace(tx, tablePath);
+      if (attrName != null) tablePath.add(attrName);
+      indexSubspace = FDBHelper.openSubspace(tx, tablePath);
+      AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(directorySubspace, tx, isInitializedToLast);
+      if (fdbIterable != null)
+        iterator = fdbIterable.iterator();
+
+      isInitialized = true;
+    }
+    // reset the currentRecord
+    currentRecord = null;
+
+    // no such directory, or no records under the directory
+    if (directorySubspace == null || !hasNext()) {
+      return null;
+    }
+
+    List<String> recordStorePath = recordsTransformer.getTableRecordPath();
+    List<FDBKVPair> fdbkvPairs = new ArrayList<>();
+
+
+    Tuple pkValTuple = null;
+    AsyncIterator<KeyValue> newIterator = null;
+    boolean isSavePK = false;
+
+    // Get records from main data using index structure
+    if (iterator.hasNext()) {
+      KeyValue kv = iterator.next();
+      Tuple keyTuple = indexSubspace.unpack(kv.getKey());
+
+      // Get primary key
+      pkValTuple = keyTuple.popFront();
+
+      newIterator = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(directorySubspace, tx, pkValTuple, false).iterator();
+      isSavePK = true;
+      // Find the record with this primary key in main data;
+      FDBKVPair kvPair = new FDBKVPair(recordStorePath, keyTuple, valTuple);
+      fdbkvPairs.add(kvPair);
+    }
+
+    isMoved = true;
+    boolean nextExists = false;
+
+    Tuple tempPkValTuple;
+    while (pkValTuple != null) {
+      KeyValue kv = newIterator.next();
+      Tuple keyTuple = directorySubspace.unpack(kv.getKey());
+      Tuple valTuple = Tuple.fromBytes(kv.getValue());
+      FDBKVPair kvPair = new FDBKVPair(recordStorePath, keyTuple, valTuple);
+      tempPkValTuple = getPrimaryKeyValTuple(keyTuple);
+      if (!isSavePK) {
+        pkValTuple = tempPkValTuple;
+        isSavePK = true;
+      } else if (!pkValTuple.equals(tempPkValTuple)){
+        // when pkVal change, stop there
+        currentKVPair = kvPair;
+        nextExists = true;
+        break;
+      }
+      fdbkvPairs.add(kvPair);
+    }
+
+    if (!fdbkvPairs.isEmpty()) {
+      currentRecord = recordsTransformer.convertBackToRecord(fdbkvPairs);
+    }
+
+    if (!nextExists) {
+      currentKVPair = null;
+    }
+
+    return currentRecord;
+  }
+
   public Record getFirst() {
     if (isInitialized) {
       return null;
     }
     isInitializedToLast = false;
 
-    Record record = moveToNextRecord(true);
+    Record record;
+    if (attrName != null)  record = moveToNextRecordIndex(true);
+    else record = moveToNextRecord(true);
+
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        record = moveToNextRecord(false);
+        if (attrName != null)  record = moveToNextRecordIndex(true);
+        else record = moveToNextRecord(true);
       }
     }
     return record;
@@ -232,10 +330,13 @@ public class Cursor {
     }
     isInitializedToLast = true;
 
-    Record record = moveToNextRecord(true);
+    Record record;
+    if (attrName != null)  record = moveToNextRecordIndex(true);
+    else record = moveToNextRecord(true);
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        record = moveToNextRecord(false);
+        if (attrName != null)  record = moveToNextRecordIndex(true);
+        else record = moveToNextRecord(true);
       }
     }
     return record;
@@ -253,10 +354,13 @@ public class Cursor {
       return null;
     }
 
-    Record record = moveToNextRecord(false);
+    Record record;
+    if (attrName != null)  record = moveToNextRecordIndex(false);
+    else record = moveToNextRecord(false);
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        record = moveToNextRecord(false);
+        if (attrName != null)  record = moveToNextRecordIndex(true);
+        else record = moveToNextRecord(true);
       }
     }
     return record;
