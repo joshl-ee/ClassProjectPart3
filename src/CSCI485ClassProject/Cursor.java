@@ -218,7 +218,7 @@ public class Cursor {
         tablePath.set(tablePath.size()-1, attrName);
       }
       indexSubspace = FDBHelper.openSubspace(tx, tablePath);
-      AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(directorySubspace, tx, isInitializedToLast);
+      AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
       if (fdbIterable != null)
         iterator = fdbIterable.iterator();
 
