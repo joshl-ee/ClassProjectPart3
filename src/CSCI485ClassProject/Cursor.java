@@ -214,7 +214,9 @@ public class Cursor {
       List<String> tablePath = recordsTransformer.getTableRecordPath();
       // Add the path of the index structure if using
       directorySubspace = FDBHelper.openSubspace(tx, tablePath);
-      if (attrName != null) tablePath.add(attrName);
+      if (attrName != null) {
+        tablePath.set(tablePath.size()-1, attrName);
+      }
       indexSubspace = FDBHelper.openSubspace(tx, tablePath);
       AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(directorySubspace, tx, isInitializedToLast);
       if (fdbIterable != null)
