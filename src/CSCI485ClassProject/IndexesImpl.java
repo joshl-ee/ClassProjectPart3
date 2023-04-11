@@ -62,7 +62,8 @@ public class IndexesImpl implements Indexes{
         //System.out.println("here");
         else currRecord = records.getNext(cursor);
         // Add record to index
-        addRecordToIndex(tableName, currRecord, attrName);
+        StatusCode status = addRecordToIndex(tableName, currRecord, attrName);
+        if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
     }
     // Create B+ tree index
@@ -82,7 +83,8 @@ public class IndexesImpl implements Indexes{
         //System.out.println("here");
         else currRecord = records.getNext(cursor);
         // Add record to index
-        addRecordToIndex(tableName, currRecord, attrName);
+        StatusCode status = addRecordToIndex(tableName, currRecord, attrName);
+        if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
     }
 
@@ -96,6 +98,9 @@ public class IndexesImpl implements Indexes{
     indexPath.add(tableName);
     indexPath.add(attrName);
     Tuple keyTuple = new Tuple();
+
+    // Check if attr Index exists
+    if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) return StatusCode.INDEX_NOT_FOUND;
 
     // Check if bplus or index
     indexPath.add("bplus");
