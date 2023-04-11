@@ -241,8 +241,8 @@ public class Cursor {
 
     // Initialize
     if (isInitializing) {
-      AsyncIterable<KeyValue> fdbIterable = FDBHelper.getKVPairIterableOfDirectory(indexSubspace, tx, isInitializedToLast);
-      if (fdbIterable != null) iterator = indexInitialize().iterator();
+      AsyncIterable<KeyValue> fdbIterable = indexInitialize();
+      if (fdbIterable != null) iterator = fdbIterable.iterator();
     }
 
     isInitialized = true;
