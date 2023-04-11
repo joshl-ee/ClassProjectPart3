@@ -117,7 +117,6 @@ public class RecordsImpl implements Records{
     List<FDBKVPair> fdbkvPairs = recordsTransformer.convertToFDBKVPairs(record);
 
     // Add records to any existing indicies
-    IndexesImpl indexesImpl = new IndexesImpl();
     for (String attrName : attrNames) {
       addRecordToIndex(tableName, record, attrName);
     }
