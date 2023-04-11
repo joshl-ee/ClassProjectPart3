@@ -37,6 +37,7 @@ public class IndexesImpl implements Indexes{
     indexPath.add(tableName);
     indexPath.add(attrName);
 
+    RecordsImpl recordsImpl = new RecordsImpl();
     // Check if index on attribute already exists
     if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
       FDBHelper.abortTransaction(tx);
@@ -62,7 +63,7 @@ public class IndexesImpl implements Indexes{
         //System.out.println("here");
         else currRecord = records.getNext(cursor);
         // Add record to index
-        StatusCode status = addRecordToIndex(tableName, currRecord, attrName);
+        StatusCode status = recordsImpl.addRecordToIndex(tableName, currRecord, attrName);
         if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
     }
@@ -83,7 +84,7 @@ public class IndexesImpl implements Indexes{
         //System.out.println("here");
         else currRecord = records.getNext(cursor);
         // Add record to index
-        StatusCode status = addRecordToIndex(tableName, currRecord, attrName);
+        StatusCode status = recordsImpl.addRecordToIndex(tableName, currRecord, attrName);
         if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
     }
@@ -91,49 +92,7 @@ public class IndexesImpl implements Indexes{
     return StatusCode.SUCCESS;
   }
 
-  public StatusCode addRecordToIndex(String tableName, Record record, String attrName) {
-    Transaction tx = FDBHelper.openTransaction(db);
-    // Check index type
-    List<String> indexPath = new ArrayList<>();
-    indexPath.add(tableName);
-    indexPath.add(attrName);
-    Tuple keyTuple = new Tuple();
 
-    // Check if attr Index exists
-    if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) return StatusCode.INDEX_NOT_FOUND;
-
-    // Check if bplus or index
-    indexPath.add("bplus");
-    if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
-      keyTuple = keyTuple.addObject(record.getValueForGivenAttrName(attrName));
-    }
-    else  {
-      indexPath.set(indexPath.size()-1, "hash");
-      int hashValue = record.getHashCodeForGivenAttrName(attrName);
-      keyTuple = keyTuple.addObject(hashValue); // Used to have .add(indexType). I don't think this is necessary anymore.
-    }
-
-    DirectorySubspace indexSubspace = FDBHelper.openSubspace(tx, indexPath);
-
-    // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
-
-    TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
-    List<String> pkNames = metadata.getPrimaryKeys();
-    Collections.sort(pkNames);
-
-    for (String pk : pkNames) {
-      keyTuple = keyTuple.addObject(record.getValueForGivenAttrName(pk));
-    }
-
-    // Create the indexed record's value tuple. This is ().
-    Tuple valueTuple = new Tuple();
-
-    //System.out.println("Made " + indexPath);
-    FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
-
-    FDBHelper.commitTransaction(tx);
-    return StatusCode.SUCCESS;
-  }
 
   @Override
   public StatusCode dropIndex(String tableName, String attrName) {

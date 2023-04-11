@@ -119,7 +119,7 @@ public class RecordsImpl implements Records{
     // Add records to any existing indicies
     IndexesImpl indexesImpl = new IndexesImpl();
     for (String attrName : attrNames) {
-      indexesImpl.addRecordToIndex(tableName, record, attrName);
+      addRecordToIndex(tableName, record, attrName);
     }
 
     DirectorySubspace dataRecordsSubspace = FDBHelper.createOrOpenSubspace(tx, recordsTransformer.getTableRecordPath());
@@ -136,7 +136,49 @@ public class RecordsImpl implements Records{
     FDBHelper.commitTransaction(tx);
     return StatusCode.SUCCESS;
   }
+  public StatusCode addRecordToIndex(String tableName, Record record, String attrName) {
+    Transaction tx = FDBHelper.openTransaction(db);
+    // Check index type
+    List<String> indexPath = new ArrayList<>();
+    indexPath.add(tableName);
+    indexPath.add(attrName);
+    Tuple keyTuple = new Tuple();
 
+    // Check if attr Index exists
+    if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) return StatusCode.INDEX_NOT_FOUND;
+
+    // Check if bplus or index
+    indexPath.add("bplus");
+    if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+      keyTuple = keyTuple.addObject(record.getValueForGivenAttrName(attrName));
+    }
+    else  {
+      indexPath.set(indexPath.size()-1, "hash");
+      int hashValue = record.getHashCodeForGivenAttrName(attrName);
+      keyTuple = keyTuple.addObject(hashValue); // Used to have .add(indexType). I don't think this is necessary anymore.
+    }
+
+    DirectorySubspace indexSubspace = FDBHelper.openSubspace(tx, indexPath);
+
+    // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
+
+    TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
+    List<String> pkNames = metadata.getPrimaryKeys();
+    Collections.sort(pkNames);
+
+    for (String pk : pkNames) {
+      keyTuple = keyTuple.addObject(record.getValueForGivenAttrName(pk));
+    }
+
+    // Create the indexed record's value tuple. This is ().
+    Tuple valueTuple = new Tuple();
+
+    //System.out.println("Made " + indexPath);
+    FDBHelper.setFDBKVPair(indexSubspace, tx, new FDBKVPair(indexPath, keyTuple, valueTuple));
+
+    FDBHelper.commitTransaction(tx);
+    return StatusCode.SUCCESS;
+  }
   @Override
   public Cursor openCursor(String tableName, Cursor.Mode mode) {
     Transaction tx = FDBHelper.openTransaction(db);
