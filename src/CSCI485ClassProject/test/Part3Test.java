@@ -197,11 +197,11 @@ public class Part3Test {
 
       long ssn = i;
       Record expectRecord = getExpectedEmployeeRecord(ssn);
-      System.out.println("Name: " + expectRecord.getValueForGivenAttrName("Name"));
-      System.out.println("Email: " + expectRecord.getValueForGivenAttrName("Email"));
-      System.out.println("Age: " + expectRecord.getValueForGivenAttrName("Age"));
-      System.out.println("Address: " + expectRecord.getValueForGivenAttrName("Address"));
-      System.out.println("Salary: " + expectRecord.getValueForGivenAttrName("Salary"));
+//      System.out.println("Name: " + expectRecord.getValueForGivenAttrName("Name"));
+//      System.out.println("Email: " + expectRecord.getValueForGivenAttrName("Email"));
+//      System.out.println("Age: " + expectRecord.getValueForGivenAttrName("Age"));
+//      System.out.println("Address: " + expectRecord.getValueForGivenAttrName("Address"));
+//      System.out.println("Salary: " + expectRecord.getValueForGivenAttrName("Salary"));
 
       assertEquals(expectRecord, record);
     }
@@ -212,48 +212,48 @@ public class Part3Test {
     assertNull(records.openCursor(EmployeeTableName, Age, 40, ComparisonOperator.LESS_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true));
     System.out.println("Test2 passed!");
   }
-//
-//
-//  @Test
-//  public void unitTest3() {
-//    assertEquals(StatusCode.SUCCESS, indexes.createIndex(EmployeeTableName, SSN, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
-//
-//    for (int i = 100; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
-//      long ssn = i;
-//      String name = getName(ssn);
-//      String email = getEmail(ssn);
-//      long age = getAge(ssn);
-//      String address = getAddress(ssn);
-//      long salary = getSalary(ssn);
-//
-//      Object[] primaryKeyVal = new Object[] {ssn};
-//      Object[] nonPrimaryKeyVal = new Object[] {name, email, age, address, salary};
-//
-//      assertEquals(StatusCode.SUCCESS, records.insertRecord(EmployeeTableName, EmployeeTablePKAttributes, primaryKeyVal, EmployeeTableNonPKAttributeNames, nonPrimaryKeyVal));
-//    }
-//
-//    Cursor cursor = records.openCursor(EmployeeTableName, Salary, 100, ComparisonOperator.GREATER_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true);
-//    assertNotNull(cursor);
-//
-//    boolean isCursorInitialized = false;
-//    for (int i = 100; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
-//      Record record;
-//      if (!isCursorInitialized) {
-//        record = records.getFirst(cursor);
-//        isCursorInitialized = true;
-//      } else {
-//        record = records.getNext(cursor);
-//      }
-//
-//      long ssn = i;
-//      Record expectRecord = getExpectedEmployeeRecord(ssn);
-//      assertEquals(expectRecord, record);
-//    }
-//
-//    assertNull(records.getNext(cursor));
-//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-//    System.out.println("Test3 passed!");
-//  }
+
+
+  @Test
+  public void unitTest3() {
+    assertEquals(StatusCode.SUCCESS, indexes.createIndex(EmployeeTableName, SSN, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
+
+    for (int i = 100; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
+      long ssn = i;
+      String name = getName(ssn);
+      String email = getEmail(ssn);
+      long age = getAge(ssn);
+      String address = getAddress(ssn);
+      long salary = getSalary(ssn);
+
+      Object[] primaryKeyVal = new Object[] {ssn};
+      Object[] nonPrimaryKeyVal = new Object[] {name, email, age, address, salary};
+
+      assertEquals(StatusCode.SUCCESS, records.insertRecord(EmployeeTableName, EmployeeTablePKAttributes, primaryKeyVal, EmployeeTableNonPKAttributeNames, nonPrimaryKeyVal));
+    }
+
+    Cursor cursor = records.openCursor(EmployeeTableName, Salary, 100, ComparisonOperator.GREATER_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true);
+    assertNotNull(cursor);
+
+    boolean isCursorInitialized = false;
+    for (int i = 100; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
+      Record record;
+      if (!isCursorInitialized) {
+        record = records.getFirst(cursor);
+        isCursorInitialized = true;
+      } else {
+        record = records.getNext(cursor);
+      }
+
+      long ssn = i;
+      Record expectRecord = getExpectedEmployeeRecord(ssn);
+      assertEquals(expectRecord, record);
+    }
+
+    assertNull(records.getNext(cursor));
+    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+    System.out.println("Test3 passed!");
+  }
 //
 //  @Test
 //  public void unitTest4() {

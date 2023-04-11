@@ -276,7 +276,8 @@ public class Cursor {
 
       // Get primary key
       pkValTuple = keyTuple.popFront();
-      System.out.println("Looking for PK " + pkValTuple.get(0).toString() + " in main");
+      //System.out.println("Looking for PK " + pkValTuple.get(0).toString() + " in main");
+      // TODO: If pass comparison then just stop
       newIterator = FDBHelper.getKVPairIterableWithPrefixInDirectory(directorySubspace, tx, pkValTuple, isInitializedToLast).iterator();
     }
 
