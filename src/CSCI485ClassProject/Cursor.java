@@ -252,6 +252,7 @@ public class Cursor {
 
     // no such directory, or no records under the directory
     if (directorySubspace == null || !hasNext()) {
+      System.out.println("Here?");
       return null;
     }
 
@@ -295,12 +296,12 @@ public class Cursor {
     isInitializedToLast = false;
 
     Record record;
-    if (attrName != null)  record = moveToNextRecordIndex(true);
+    if (isUsingIndex)  record = moveToNextRecordIndex(true);
     else record = moveToNextRecord(true);
 
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        if (attrName != null)  record = moveToNextRecordIndex(true);
+        if (isUsingIndex)  record = moveToNextRecordIndex(true);
         else record = moveToNextRecord(true);
       }
     }
@@ -333,11 +334,11 @@ public class Cursor {
     isInitializedToLast = true;
 
     Record record;
-    if (attrName != null)  record = moveToNextRecordIndex(true);
+    if (isUsingIndex)  record = moveToNextRecordIndex(true);
     else record = moveToNextRecord(true);
     if (isPredicateEnabled) {
       while (record != null && !doesRecordMatchPredicate(record)) {
-        if (attrName != null)  record = moveToNextRecordIndex(true);
+        if (isUsingIndex)  record = moveToNextRecordIndex(true);
         else record = moveToNextRecord(true);
       }
     }
