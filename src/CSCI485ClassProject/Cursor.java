@@ -252,9 +252,9 @@ public class Cursor {
         iterator = fdbIterable.iterator();
         isInitialized = true;
         System.out.println("here");
+        System.out.println("Iterator has next: " iterator.hasNext());
       }
     }
-
 
     // reset the currentRecord
     currentRecord = null;
