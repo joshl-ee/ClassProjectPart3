@@ -248,9 +248,6 @@ public class Cursor {
 
       newIterator = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(directorySubspace, tx, pkValTuple, false).iterator();
       isSavePK = true;
-      // Find the record with this primary key in main data;
-      FDBKVPair kvPair = new FDBKVPair(recordStorePath, keyTuple, valTuple);
-      fdbkvPairs.add(kvPair);
     }
 
     isMoved = true;
