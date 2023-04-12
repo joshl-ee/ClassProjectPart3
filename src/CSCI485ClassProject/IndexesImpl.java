@@ -88,7 +88,7 @@ public class IndexesImpl implements Indexes{
         if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
     }
-
+    recordsImpl.closeDatabase();
     return StatusCode.SUCCESS;
   }
 
@@ -105,12 +105,16 @@ public class IndexesImpl implements Indexes{
     FDBHelper.dropSubspace(tx, indexPath);
 
     if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
-      if (FDBHelper.commitTransaction(tx)) return StatusCode.SUCCESS;
+      if (FDBHelper.commitTransaction(tx)) {
+        FDBHelper.abortTransaction(tx);
+        return StatusCode.SUCCESS;
+      }
     }
     else {
       FDBHelper.abortTransaction(tx);
       return StatusCode.INDEX_NOT_FOUND;
     }
+    FDBHelper.abortTransaction(tx);
     return StatusCode.INDEX_NOT_FOUND;
   }
   @Override
