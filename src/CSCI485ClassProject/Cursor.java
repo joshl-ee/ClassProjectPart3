@@ -230,8 +230,9 @@ public class Cursor {
     Tuple rangeTuple = new Tuple();
     // If predicate mode is equalsTo, iterator must start pointing at attrValue
     if (predicateOperator == ComparisonOperator.EQUAL_TO) {
-      rangeTuple = rangeTuple.addObject(predicateAttributeValue.getValue());
-      fdbIterable = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(directorySubspace, tx, rangeTuple, isInitializedToLast);
+      if (indexType == IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX) rangeTuple = rangeTuple.addObject(predicateAttributeValue.getValue());
+      else rangeTuple = rangeTuple.addObject(predicateAttributeValue.hashCode());
+      fdbIterable = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(indexSubspace, tx, rangeTuple, isInitializedToLast);
     }
     else {
       Range dirRange = indexSubspace.range(rangeTuple);
