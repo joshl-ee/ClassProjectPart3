@@ -96,8 +96,22 @@ public class IndexesImpl implements Indexes{
 
   @Override
   public StatusCode dropIndex(String tableName, String attrName) {
-    // your code
-    return null;
+    Transaction tx = FDBHelper.openTransaction(db);
+
+    List<String> indexPath = new ArrayList<>();
+    indexPath.add(tableName);
+    indexPath.add(attrName);
+
+    FDBHelper.dropSubspace(tx, indexPath);
+
+    if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+      if (FDBHelper.commitTransaction(tx)) return StatusCode.SUCCESS;
+    }
+    else {
+      FDBHelper.abortTransaction(tx);
+      return StatusCode.INDEX_NOT_FOUND;
+    }
+    return StatusCode.INDEX_NOT_FOUND;
   }
   @Override
   public void closeDatabase() {
