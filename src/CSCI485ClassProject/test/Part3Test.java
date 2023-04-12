@@ -254,55 +254,55 @@ public class Part3Test {
     assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
     System.out.println("Test3 passed!");
   }
-//
-//  @Test
-//  public void unitTest4() {
-//    Cursor cursor = records.openCursor(EmployeeTableName, Cursor.Mode.READ_WRITE);
-//
-//    boolean isCursorInitialized = false;
-//    while (true) {
-//      Record record;
-//      if (!isCursorInitialized) {
-//        record = records.getFirst(cursor);
-//        isCursorInitialized = true;
-//      } else {
-//        record = records.getNext(cursor);
-//      }
-//
-//      if (record == null) {
-//        break;
-//      }
-//      long ssn = (long) record.getValueForGivenAttrName(SSN);
-//      if (ssn % 2 == 1) {
-//        // Odd SSN record, delete it
-//        assertEquals(StatusCode.SUCCESS, records.deleteRecord(cursor));
-//      }
-//    }
-//
-//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-//
-//    cursor = records.openCursor(EmployeeTableName, SSN, initialNumberOfRecords + updatedNumberOfRecords, ComparisonOperator.LESS_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true);
-//    isCursorInitialized = false;
-//    while (true) {
-//      Record record;
-//      if (!isCursorInitialized) {
-//        record = records.getFirst(cursor);
-//        isCursorInitialized = true;
-//      } else {
-//        record = records.getNext(cursor);
-//      }
-//
-//      if (record == null) {
-//        break;
-//      }
-//      long ssn = (long) record.getValueForGivenAttrName(SSN);
-//      assertEquals(0, ssn % 2);
-//    }
-//
-//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-//    System.out.println("Test4 passed!");
-//  }
-//
+
+  @Test
+  public void unitTest4() {
+    Cursor cursor = records.openCursor(EmployeeTableName, Cursor.Mode.READ_WRITE);
+
+    boolean isCursorInitialized = false;
+    while (true) {
+      Record record;
+      if (!isCursorInitialized) {
+        record = records.getFirst(cursor);
+        isCursorInitialized = true;
+      } else {
+        record = records.getNext(cursor);
+      }
+
+      if (record == null) {
+        break;
+      }
+      long ssn = (long) record.getValueForGivenAttrName(SSN);
+      if (ssn % 2 == 1) {
+        // Odd SSN record, delete it
+        assertEquals(StatusCode.SUCCESS, records.deleteRecord(cursor));
+      }
+    }
+
+    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+
+    cursor = records.openCursor(EmployeeTableName, SSN, initialNumberOfRecords + updatedNumberOfRecords, ComparisonOperator.LESS_THAN_OR_EQUAL_TO, Cursor.Mode.READ, true);
+    isCursorInitialized = false;
+    while (true) {
+      Record record;
+      if (!isCursorInitialized) {
+        record = records.getFirst(cursor);
+        isCursorInitialized = true;
+      } else {
+        record = records.getNext(cursor);
+      }
+
+      if (record == null) {
+        break;
+      }
+      long ssn = (long) record.getValueForGivenAttrName(SSN);
+      assertEquals(0, ssn % 2);
+    }
+
+    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+    System.out.println("Test4 passed!");
+  }
+
 //  @Test
 //  public void unitTest5() {
 //    for (int i = 0; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
