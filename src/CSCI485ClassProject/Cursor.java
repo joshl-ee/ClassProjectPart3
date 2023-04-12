@@ -204,7 +204,7 @@ public class Cursor {
   }
 
   private AsyncIterable<KeyValue> indexInitialize() {
-    System.out.println("initializing");
+    //System.out.println("initializing");
     // Set pointer to main data directory
     recordsTransformer = new RecordsTransformer(getTableName(), getTableMetadata());
     List<String> tablePath = recordsTransformer.getTableRecordPath();

@@ -117,13 +117,14 @@ public class RecordsImpl implements Records{
     List<FDBKVPair> fdbkvPairs = recordsTransformer.convertToFDBKVPairs(record);
 
     // Add records to any existing indicies
+    List<String> indexPath = new ArrayList<>();
+    indexPath.add(tableName);
     for (String attrName : attrNames) {
-      List<String> indexPath = new ArrayList<>();
-      indexPath.add(tableName);
       indexPath.add(attrName);
       if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
         addRecordToIndex(tableName, record, attrName);
       }
+      indexPath.remove(indexPath.size()-1);
     }
 
     DirectorySubspace dataRecordsSubspace = FDBHelper.createOrOpenSubspace(tx, recordsTransformer.getTableRecordPath());
