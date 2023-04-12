@@ -121,11 +121,9 @@ public class RecordsImpl implements Records{
       List<String> indexPath = new ArrayList<>();
       indexPath.add(tableName);
       indexPath.add(attrName);
-      if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
-        FDBHelper.abortTransaction(tx);
-        return StatusCode.INDEX_NOT_FOUND;
+      if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+        addRecordToIndex(tableName, record, attrName);
       }
-      addRecordToIndex(tableName, record, attrName);
     }
 
     DirectorySubspace dataRecordsSubspace = FDBHelper.createOrOpenSubspace(tx, recordsTransformer.getTableRecordPath());
