@@ -231,11 +231,12 @@ public class Cursor {
     // If predicate mode is equalsTo, iterator must start pointing at attrValue
     if (predicateOperator == ComparisonOperator.EQUAL_TO) {
       rangeTuple = rangeTuple.addObject(predicateAttributeValue.getValue());
+      fdbIterable = FDBHelper.getKVPairIterableStartWithPrefixInDirectory(directorySubspace, tx, rangeTuple, isInitializedToLast);
     }
-
-    Range dirRange = indexSubspace.range(rangeTuple);
-    fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
-
+    else {
+      Range dirRange = indexSubspace.range(rangeTuple);
+      fdbIterable = tx.getRange(dirRange, ReadTransaction.ROW_LIMIT_UNLIMITED, isInitializedToLast);
+    }
     return fdbIterable;
   }
   private Record moveToNextRecordIndex(boolean isInitializing) {
