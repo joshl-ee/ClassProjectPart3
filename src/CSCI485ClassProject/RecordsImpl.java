@@ -116,7 +116,7 @@ public class RecordsImpl implements Records{
 
     List<FDBKVPair> fdbkvPairs = recordsTransformer.convertToFDBKVPairs(record);
 
-    // Add records to any existing indicies
+    // Add records to any existing indices
     List<String> indexPath = new ArrayList<>();
     indexPath.add(tableName);
     for (String attrName : attrNames) {
@@ -169,7 +169,6 @@ public class RecordsImpl implements Records{
     DirectorySubspace indexSubspace = FDBHelper.openSubspace(tx, indexPath);
 
     // Create the indexed record's key tuple. This is (hashValue, primaryKey0, primaryKey1..., primaryKeyN).
-
     TableMetadata metadata = getTableMetadataByTableName(tx, tableName);
     List<String> pkNames = metadata.getPrimaryKeys();
     Collections.sort(pkNames);
