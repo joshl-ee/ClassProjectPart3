@@ -118,6 +118,13 @@ public class RecordsImpl implements Records{
 
     // Add records to any existing indicies
     for (String attrName : attrNames) {
+      List<String> indexPath = new ArrayList<>();
+      indexPath.add(tableName);
+      indexPath.add(attrName);
+      if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+        FDBHelper.abortTransaction(tx);
+        return StatusCode.INDEX_NOT_FOUND;
+      }
       addRecordToIndex(tableName, record, attrName);
     }
 
