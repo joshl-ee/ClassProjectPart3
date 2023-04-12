@@ -111,6 +111,7 @@ public class IndexesImpl implements Indexes{
       if (FDBHelper.commitTransaction(tx)) {
         return StatusCode.SUCCESS;
       }
+      else FDBHelper.abortTransaction(tx);
     }
     else {
       FDBHelper.abortTransaction(tx);
