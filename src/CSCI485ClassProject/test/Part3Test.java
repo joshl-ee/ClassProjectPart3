@@ -389,6 +389,7 @@ public class Part3Test {
     assertEquals(StatusCode.SUCCESS, tableManager.createTable(PerfTableName,
         PerfTableAttributeNames, PerfTableAttributeTypes, PerfTablePKAttributes));
 
+    System.out.println("Adding records");
     Random randGenerator = new Random(randSeed);
     for (int i = 0; i < numOfRecords; i++) {
       Long randVal = getPerfRandNumber(randGenerator);
@@ -398,6 +399,8 @@ public class Part3Test {
 
       assertEquals(StatusCode.SUCCESS, records.insertRecord(PerfTableName, PerfTablePKAttributes, primaryKeyVal, PerfTableNonPKAttributes, nonPrimaryKeyVal));
     }
+    System.out.println("Finished adding records");
+
 
     long startTime = System.nanoTime();
     randGenerator = new Random(randSeed);
