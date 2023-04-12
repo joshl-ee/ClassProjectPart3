@@ -66,6 +66,8 @@ public class IndexesImpl implements Indexes{
         StatusCode status = recordsImpl.addRecordToIndex(tableName, currRecord, attrName);
         if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
+      records.closeDatabase();
+
     }
     // Create B+ tree index
     else {
@@ -87,6 +89,7 @@ public class IndexesImpl implements Indexes{
         StatusCode status = recordsImpl.addRecordToIndex(tableName, currRecord, attrName);
         if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
+      records.closeDatabase();
     }
     recordsImpl.closeDatabase();
     return StatusCode.SUCCESS;
