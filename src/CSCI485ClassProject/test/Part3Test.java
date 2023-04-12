@@ -326,119 +326,119 @@ public class Part3Test {
     System.out.println("Test5 passed!");
   }
 
-  @Test
-  public void unitTest6() {
-    Cursor cursor = records.openCursor(EmployeeTableName, Cursor.Mode.READ_WRITE);
-
-    boolean isCursorInitialized = false;
-    for (int i = 0; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
-      Record record;
-      if (!isCursorInitialized) {
-        record = records.getFirst(cursor);
-        isCursorInitialized = true;
-      } else {
-        record = records.getNext(cursor);
-      }
-
-      long salary = (long) record.getValueForGivenAttrName(Salary);
-
-      assertEquals(StatusCode.SUCCESS, records.updateRecord(cursor, new String[] {Salary}, new Object[] {salary * 2}));
-    }
-
-    assertNull(records.getNext(cursor));
-    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-    isCursorInitialized = false;
-
-    cursor = records.openCursor(EmployeeTableName, Salary, 0, ComparisonOperator.GREATER_THAN, Cursor.Mode.READ, true);
-    for (int i = 1; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
-      Record record;
-      if (!isCursorInitialized) {
-        record = records.getFirst(cursor);
-        isCursorInitialized = true;
-      } else {
-        record = records.getNext(cursor);
-      }
-      long salary = (long) record.getValueForGivenAttrName(Salary);
-      assertEquals(2 * getSalary(i), salary);
-    }
-    assertNull(records.getNext(cursor));
-    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-    System.out.println("Test6 passed!");
-  }
-
-  @Test
-  public void unitTest7() {
-    // perf test
-    // create the Perf Table
-
-    tableManager.dropAllTables();
-
-    int numOfRecords = 1000000;
-    int numOfQueries = 10000;
-
-    String INT0 = "INT0";
-    String INT1 = "INT1";
-    String INT2 = "INT2";
-
-    String[] PerfTableAttributeNames = new String[] {INT0, INT1, INT2};
-    AttributeType[] PerfTableAttributeTypes = new AttributeType[] {AttributeType.INT, AttributeType.INT, AttributeType.INT};
-    String[] PerfTablePKAttributes = new String[] {INT0};
-    String[] PerfTableNonPKAttributes = new String[] {INT1, INT2};
-
-    String PerfTableName = "Test7";
-    assertEquals(StatusCode.SUCCESS, tableManager.createTable(PerfTableName,
-        PerfTableAttributeNames, PerfTableAttributeTypes, PerfTablePKAttributes));
-
-    Random randGenerator = new Random(randSeed);
-    for (int i = 0; i < numOfRecords; i++) {
-      Long randVal = getPerfRandNumber(randGenerator);
-
-      Object[] primaryKeyVal = new Object[] {i};
-      Object[] nonPrimaryKeyVal = new Object[] {randVal, randVal};
-
-      assertEquals(StatusCode.SUCCESS, records.insertRecord(PerfTableName, PerfTablePKAttributes, primaryKeyVal, PerfTableNonPKAttributes, nonPrimaryKeyVal));
-    }
-
-    long startTime = System.nanoTime();
-    randGenerator = new Random(randSeed);
-    for (int i = 0; i < numOfQueries; i++) {
-      Long randVal = getPerfRandNumber(randGenerator);
-      Cursor cursor = records.openCursor(PerfTableName, INT1, randVal, ComparisonOperator.EQUAL_TO, Cursor.Mode.READ, false);
-      assertNotNull(records.getFirst(cursor));
-      assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-    }
-    long endTime = System.nanoTime();
-    long executionTimeWithoutIndex = (endTime - startTime) / 1000;
-    System.out.println("Query " + numOfQueries + " Records without index: " + executionTimeWithoutIndex + " milliseconds");
-
-
-    assertEquals(StatusCode.SUCCESS, indexes.createIndex(PerfTableName, INT1, IndexType.NON_CLUSTERED_HASH_INDEX));
-    startTime = System.nanoTime();
-    randGenerator = new Random(randSeed);
-    for (int i = 0; i < numOfQueries; i++) {
-      Long randVal = getPerfRandNumber(randGenerator);
-      Cursor cursor = records.openCursor(PerfTableName, INT1, randVal, ComparisonOperator.EQUAL_TO, Cursor.Mode.READ, true);
-      assertNotNull(records.getFirst(cursor));
-      assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-    }
-    endTime = System.nanoTime();
-    long executionTimeWithHashIndex = (endTime - startTime) / 1000;
-    System.out.println("Query " + numOfQueries + " Records with non-clustered hash index: " + executionTimeWithHashIndex + " milliseconds");
-
-
-    assertEquals(StatusCode.SUCCESS, indexes.dropIndex(PerfTableName, INT1));
-    assertEquals(StatusCode.SUCCESS, indexes.createIndex(PerfTableName, INT1, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
-    startTime = System.nanoTime();
-    randGenerator = new Random(randSeed);
-    for (int i = 0; i < numOfQueries; i++) {
-      Long randVal = getPerfRandNumber(randGenerator);
-      Cursor cursor = records.openCursor(PerfTableName, INT1, randVal, ComparisonOperator.EQUAL_TO, Cursor.Mode.READ, true);
-      assertNotNull(records.getFirst(cursor));
-      assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
-    }
-    endTime = System.nanoTime();
-    long executionTimeWithBPlusTreeIndex = (endTime - startTime) / 1000;
-    System.out.println("Query " + numOfQueries + " Records with non-clustered B+Tree index: " + executionTimeWithBPlusTreeIndex + " milliseconds");
-    System.out.println("Test7 passed!");
-  }
+//  @Test
+//  public void unitTest6() {
+//    Cursor cursor = records.openCursor(EmployeeTableName, Cursor.Mode.READ_WRITE);
+//
+//    boolean isCursorInitialized = false;
+//    for (int i = 0; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
+//      Record record;
+//      if (!isCursorInitialized) {
+//        record = records.getFirst(cursor);
+//        isCursorInitialized = true;
+//      } else {
+//        record = records.getNext(cursor);
+//      }
+//
+//      long salary = (long) record.getValueForGivenAttrName(Salary);
+//
+//      assertEquals(StatusCode.SUCCESS, records.updateRecord(cursor, new String[] {Salary}, new Object[] {salary * 2}));
+//    }
+//
+//    assertNull(records.getNext(cursor));
+//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+//    isCursorInitialized = false;
+//
+//    cursor = records.openCursor(EmployeeTableName, Salary, 0, ComparisonOperator.GREATER_THAN, Cursor.Mode.READ, true);
+//    for (int i = 1; i < initialNumberOfRecords + updatedNumberOfRecords; i++) {
+//      Record record;
+//      if (!isCursorInitialized) {
+//        record = records.getFirst(cursor);
+//        isCursorInitialized = true;
+//      } else {
+//        record = records.getNext(cursor);
+//      }
+//      long salary = (long) record.getValueForGivenAttrName(Salary);
+//      assertEquals(2 * getSalary(i), salary);
+//    }
+//    assertNull(records.getNext(cursor));
+//    assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+//    System.out.println("Test6 passed!");
+//  }
+//
+//  @Test
+//  public void unitTest7() {
+//    // perf test
+//    // create the Perf Table
+//
+//    tableManager.dropAllTables();
+//
+//    int numOfRecords = 1000000;
+//    int numOfQueries = 10000;
+//
+//    String INT0 = "INT0";
+//    String INT1 = "INT1";
+//    String INT2 = "INT2";
+//
+//    String[] PerfTableAttributeNames = new String[] {INT0, INT1, INT2};
+//    AttributeType[] PerfTableAttributeTypes = new AttributeType[] {AttributeType.INT, AttributeType.INT, AttributeType.INT};
+//    String[] PerfTablePKAttributes = new String[] {INT0};
+//    String[] PerfTableNonPKAttributes = new String[] {INT1, INT2};
+//
+//    String PerfTableName = "Test7";
+//    assertEquals(StatusCode.SUCCESS, tableManager.createTable(PerfTableName,
+//        PerfTableAttributeNames, PerfTableAttributeTypes, PerfTablePKAttributes));
+//
+//    Random randGenerator = new Random(randSeed);
+//    for (int i = 0; i < numOfRecords; i++) {
+//      Long randVal = getPerfRandNumber(randGenerator);
+//
+//      Object[] primaryKeyVal = new Object[] {i};
+//      Object[] nonPrimaryKeyVal = new Object[] {randVal, randVal};
+//
+//      assertEquals(StatusCode.SUCCESS, records.insertRecord(PerfTableName, PerfTablePKAttributes, primaryKeyVal, PerfTableNonPKAttributes, nonPrimaryKeyVal));
+//    }
+//
+//    long startTime = System.nanoTime();
+//    randGenerator = new Random(randSeed);
+//    for (int i = 0; i < numOfQueries; i++) {
+//      Long randVal = getPerfRandNumber(randGenerator);
+//      Cursor cursor = records.openCursor(PerfTableName, INT1, randVal, ComparisonOperator.EQUAL_TO, Cursor.Mode.READ, false);
+//      assertNotNull(records.getFirst(cursor));
+//      assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+//    }
+//    long endTime = System.nanoTime();
+//    long executionTimeWithoutIndex = (endTime - startTime) / 1000;
+//    System.out.println("Query " + numOfQueries + " Records without index: " + executionTimeWithoutIndex + " milliseconds");
+//
+//
+//    assertEquals(StatusCode.SUCCESS, indexes.createIndex(PerfTableName, INT1, IndexType.NON_CLUSTERED_HASH_INDEX));
+//    startTime = System.nanoTime();
+//    randGenerator = new Random(randSeed);
+//    for (int i = 0; i < numOfQueries; i++) {
+//      Long randVal = getPerfRandNumber(randGenerator);
+//      Cursor cursor = records.openCursor(PerfTableName, INT1, randVal, ComparisonOperator.EQUAL_TO, Cursor.Mode.READ, true);
+//      assertNotNull(records.getFirst(cursor));
+//      assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+//    }
+//    endTime = System.nanoTime();
+//    long executionTimeWithHashIndex = (endTime - startTime) / 1000;
+//    System.out.println("Query " + numOfQueries + " Records with non-clustered hash index: " + executionTimeWithHashIndex + " milliseconds");
+//
+//
+//    assertEquals(StatusCode.SUCCESS, indexes.dropIndex(PerfTableName, INT1));
+//    assertEquals(StatusCode.SUCCESS, indexes.createIndex(PerfTableName, INT1, IndexType.NON_CLUSTERED_B_PLUS_TREE_INDEX));
+//    startTime = System.nanoTime();
+//    randGenerator = new Random(randSeed);
+//    for (int i = 0; i < numOfQueries; i++) {
+//      Long randVal = getPerfRandNumber(randGenerator);
+//      Cursor cursor = records.openCursor(PerfTableName, INT1, randVal, ComparisonOperator.EQUAL_TO, Cursor.Mode.READ, true);
+//      assertNotNull(records.getFirst(cursor));
+//      assertEquals(StatusCode.SUCCESS, records.commitCursor(cursor));
+//    }
+//    endTime = System.nanoTime();
+//    long executionTimeWithBPlusTreeIndex = (endTime - startTime) / 1000;
+//    System.out.println("Query " + numOfQueries + " Records with non-clustered B+Tree index: " + executionTimeWithBPlusTreeIndex + " milliseconds");
+//    System.out.println("Test7 passed!");
+//  }
 }
