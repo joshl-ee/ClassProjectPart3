@@ -104,7 +104,7 @@ public class IndexesImpl implements Indexes{
 
     FDBHelper.dropSubspace(tx, indexPath);
 
-    if (FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+    if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
       if (FDBHelper.commitTransaction(tx)) return StatusCode.SUCCESS;
     }
     else {
