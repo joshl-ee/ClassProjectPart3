@@ -144,7 +144,10 @@ public class RecordsImpl implements Records{
     Tuple keyTuple = new Tuple();
 
     // Check if attr Index exists
-    if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) return StatusCode.INDEX_NOT_FOUND;
+    if (!FDBHelper.doesSubdirectoryExists(tx, indexPath)) {
+      FDBHelper.abortTransaction(tx);
+      return StatusCode.INDEX_NOT_FOUND;
+    }
 
     // Check if bplus or index
     indexPath.add("bplus");
