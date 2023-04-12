@@ -230,7 +230,7 @@ public class Cursor {
     Tuple rangeTuple = new Tuple();
     // If predicate mode is equalsTo, iterator must start pointing at attrValue
     if (predicateOperator == ComparisonOperator.EQUAL_TO) {
-      rangeTuple = rangeTuple.addObject(predicateAttributeValue);
+      rangeTuple = rangeTuple.addObject(predicateAttributeValue.getValue());
     }
 
     Range dirRange = indexSubspace.range(rangeTuple);
