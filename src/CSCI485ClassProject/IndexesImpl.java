@@ -67,7 +67,6 @@ public class IndexesImpl implements Indexes{
         if (status == StatusCode.INDEX_NOT_FOUND) System.out.println("Index not found. This should never happen");
       }
       records.closeDatabase();
-
     }
     // Create B+ tree index
     else {

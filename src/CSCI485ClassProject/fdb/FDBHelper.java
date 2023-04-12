@@ -165,6 +165,7 @@ public class FDBHelper {
         tryCommitTx(tx, retryCounter);
       } else {
         tx.cancel();
+        tx.close();
         return false;
       }
     }
